@@ -17,9 +17,9 @@ class ProfileRead(BaseModel):
 
 # ExperienceCreate
 class ExperienceCreate(BaseModel):
-    title: str = Field(None, max_length=50)
-    organization: str = Field(None, max_length=50)
-    location: str = Field(None, max_length=50)
+    title: str | None = Field(None, max_length=50)
+    organization: str | None = Field(None, max_length=50)
+    location: str | None = Field(None, max_length=50)
     kind: Literal['school', 'work', 'side_project']
     start_date: date
     end_date: date | None = None
@@ -39,7 +39,7 @@ class ExperienceRead(BaseModel):
 
 # BulletCreate
 class BulletCreate(BaseModel):
-    body: str = Field(None, max_length=300)
+    body: str = Field(..., min_length=1, max_length=300)
     sort_order: int = 0
 
 
@@ -53,19 +53,19 @@ class BulletRead(BaseModel):
 
 # EduDetailCreate
 class EduDetailCreate(BaseModel):
-    gpa: float = 0.000
+    gpa: float | None
 
 
 # EduDetailRead
 class EduDetailRead(BaseModel):
     experience_id: int
-    gpa: float
+    gpa: float | None
 
 
 # CourseCreate
 class CourseCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length= 30)
-    code: str = Field(None, max_length=15)
+    code: str | None = Field(None, max_length=15)
     sort_order: int = 0
 
 

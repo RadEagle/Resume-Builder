@@ -32,9 +32,9 @@ async def ensure_exp_id_exists(profile_id: int, experience_id: int):
                 await cur.execute(
                     '''
                     SELECT 1 FROM experience
-                    WHERE id = %s
+                    WHERE id = %s AND profile_id = %s
                     ''',
-                    (experience_id,),
+                    (experience_id, profile_id),
                 )
                 row = await cur.fetchone()
     except Exception as e:
