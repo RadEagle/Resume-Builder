@@ -1,17 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from psycopg_pool import AsyncConnectionPool
-from dotenv import load_dotenv
-import os
-from pathlib import Path
+from database import pool, DATABASE_URL
+from routers.profiles import router as profiles_router
 
 
-load_dotenv(Path(__file__).resolve().parent / ".env")
-DATABASE_URL = os.getenv("DATABASE_URL")
-pool = AsyncConnectionPool(conninfo=DATABASE_URL, open=False)
-
-# Define the lifespan manager <& CODING PATTERN &>
+# 1. Define the lifespan manager <& CODING PATTERN &>
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- Startup Logic ---
@@ -31,6 +25,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# 2. Define the CORS middleware
 origins = [
     "http://localhost:5173"
 ]
@@ -43,6 +38,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# 3. Declare which routers to include
+app.include_router(profiles_router, prefix="/api")
+
+# 4. Set up the app factory
 @app.get("/")
 async def main():
     if not DATABASE_URL:
@@ -73,3 +72,6 @@ async def health_db():
     except Exception as e:
         print(repr(e))
         raise HTTPException(status_code=503, detail="Database unavailable")
+
+# 5. Run the code
+# uvicorn main:app --reload --port 8000
