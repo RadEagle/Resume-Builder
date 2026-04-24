@@ -63,9 +63,19 @@ class EduDetailRead(BaseModel):
 
 
 # CourseCreate
+class CourseCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length= 30)
+    code: str = Field(None, max_length=15)
+    sort_order: int = 0
 
 
 # CourseRead
+class CourseRead(BaseModel):
+    id: int
+    experience_id: int
+    name: str
+    code: Optional[str]
+    sort_order: int
 
 
 # SkillCreate

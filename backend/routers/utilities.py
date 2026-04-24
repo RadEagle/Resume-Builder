@@ -42,5 +42,5 @@ async def ensure_exp_id_exists(profile_id: int, experience_id: int):
         raise HTTPException(status_code=503, detail="Database unavailable")
 
     if not row:
-        raise HTTPException(status_code=404, detail="Profile not found")
+        raise HTTPException(status_code=404, detail="Experience not found")
 
