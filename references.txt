@@ -1,0 +1,8 @@
+Database
+pgAdmin 4
+
+Backend
+https://fastapi.tiangolo.com/tutorial/cors/#wildcards
+
+Frontend
+https://tailwindcss.com/docs/installation/using-vite
