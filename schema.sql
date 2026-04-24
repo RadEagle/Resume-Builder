@@ -68,4 +68,4 @@ CREATE TABLE skill (
 CREATE INDEX idx_experience_profile_id ON experience (profile_id);
 CREATE INDEX idx_experience_bullet_experience_id ON experience_bullet (experience_id);
 CREATE INDEX idx_education_course_experience_id ON education_course (experience_id);
-CREATE INDEX idx_skills_profile_id ON skills (profile_id);
+CREATE INDEX idx_skill_profile_id ON skill (profile_id);
