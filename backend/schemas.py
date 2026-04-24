@@ -79,6 +79,14 @@ class CourseRead(BaseModel):
 
 
 # SkillCreate
+class SkillCreate(BaseModel):
+    name: str = Field(..., min_length=1, max_length=30)
+    category: Literal["technical", "soft", "interest"]
 
 
 # SkillRead
+class SkillRead(BaseModel):
+    id: int
+    profile_id: int
+    name: str
+    category: Literal["technical", "soft", "interest"]
