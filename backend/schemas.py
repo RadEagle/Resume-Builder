@@ -51,10 +51,15 @@ class BulletRead(BaseModel):
     sort_order: int
 
 
-# ExpDetailCreate
+# EduDetailCreate
+class EduDetailCreate(BaseModel):
+    gpa: float = 0.000
 
 
-# ExpDetailRead
+# EduDetailRead
+class EduDetailRead(BaseModel):
+    experience_id: int
+    gpa: float
 
 
 # CourseCreate
