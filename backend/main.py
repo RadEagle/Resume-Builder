@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import pool, DATABASE_URL
 from routers.profiles import router as profiles_router
 from routers.experiences import router as experiences_router
+from routers.bullets import router as bullets_router
 
 
 # 1. Define the lifespan manager <& CODING PATTERN &>
@@ -42,6 +43,7 @@ app.add_middleware(
 # 3. Declare which routers to include
 app.include_router(profiles_router, prefix="/api")
 app.include_router(experiences_router, prefix="/api")
+app.include_router(bullets_router, prefix="/api")
 
 # 4. Set up the app factory
 @app.get("/")

@@ -21,3 +21,26 @@ async def ensure_profile_id_exists(profile_id: int):
 
     if not row:
         raise HTTPException(status_code=404, detail="Profile not found")
+
+
+async def ensure_exp_id_exists(profile_id: int, experience_id: int):
+    await ensure_profile_id_exists(profile_id)
+    
+    try:
+        async with pool.connection() as conn:
+            async with conn.cursor(row_factory=dict_row) as cur:
+                await cur.execute(
+                    '''
+                    SELECT 1 FROM experience
+                    WHERE id = %s
+                    ''',
+                    (experience_id,),
+                )
+                row = await cur.fetchone()
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Profile not found")
+

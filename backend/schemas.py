@@ -38,9 +38,17 @@ class ExperienceRead(BaseModel):
 
 
 # BulletCreate
+class BulletCreate(BaseModel):
+    body: str = Field(None, max_length=300)
+    sort_order: int = 0
 
 
 # BulletRead
+class BulletRead(BaseModel):
+    id: int
+    experience_id: int
+    body: str
+    sort_order: int
 
 
 # ExpDetailCreate
