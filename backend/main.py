@@ -46,15 +46,6 @@ app.include_router(profiles_router, prefix="/api")
 async def main():
     if not DATABASE_URL:
         raise HTTPException(status_code=500, detail="Missing DATABASE_URL")
-    try:
-        async with pool.connection() as conn:
-            async with conn.cursor() as cur:
-                await cur.execute("SELECT * FROM experience;");
-                result = await cur.fetchone()
-                print(f"Result: {result}")
-    except Exception as e:
-        print(repr(e))
-        raise HTTPException(status_code=503, detail="Database unavailable")
 
     return {"message": "resume-vault-api"}
 
