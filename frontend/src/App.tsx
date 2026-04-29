@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import { buildUrl } from './api.ts'
 import './App.css'
 import { HARDCODED_PROFILE_ID } from './config.ts'
+import { ViteStarter, ViteNextSteps } from './Vite.tsx'
 
 async function createProfile(name: string) {
   const response = await fetch(buildUrl("profiles"), {
@@ -21,7 +19,6 @@ async function createProfile(name: string) {
 }
 
 function App() {
-  const [count, setCount] = useState(0)
   const [profiles, setProfiles] = useState([])
   const [experiences, setExperiences] = useState([])
   const [loading, setLoading] = useState(true)
@@ -70,24 +67,8 @@ function App() {
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+      <section id="center" className="m-4">
+        <ViteStarter />
         <h2 className="text-3xl font-bold">
           Hello world!!
         </h2>
@@ -103,16 +84,19 @@ function App() {
 
       <div className="ticks"></div>
 
-      <section id="profiles">
+      <section id="profiles" className="m-4">
         <h2>Profiles</h2>
         <input 
           type="text" 
           placeholder="Create new profile" 
           value={newProfileName}
           onChange={e => setNewProfileName(e.target.value)}
+          className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
         />
-        <button onClick={void handleCreateProfile()} className="cursor-pointer bg-blue-300 rounded-2xl px-4 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
+        <button onClick={void handleCreateProfile()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
       </section>
+
+      <ViteNextSteps />
 
       <div className="ticks"></div>
       <section id="spacer"></section>
