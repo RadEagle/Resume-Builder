@@ -66,7 +66,7 @@ function Profiles() {
             ))}
           </div>
     
-          <div id="profiles" className="m-4">
+          <div id="profile-creation" className="m-4">
             <h2>Create Profile</h2>
             <input 
               type="text" 
