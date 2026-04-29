@@ -59,8 +59,8 @@ CREATE TABLE education_course (
 CREATE TABLE skill (
     id SERIAL PRIMARY KEY,
     profile_id INT NOT NULL,
-    category TEXT NOT NULL CHECK (category IN ('technical', 'soft', 'interest')),
     name TEXT NOT NULL,
+    category TEXT NOT NULL CHECK (category IN ('technical', 'soft', 'interest')),
     CONSTRAINT fk_profile
     FOREIGN KEY (profile_id)
     REFERENCES resume_profile(id)
