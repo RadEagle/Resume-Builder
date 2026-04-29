@@ -4,12 +4,29 @@ import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
 import { buildUrl } from './api.ts'
 import './App.css'
+import { HARDCODED_PROFILE_ID } from './config.ts'
+
+async function createProfile(name: string) {
+  const response = await fetch(buildUrl("profiles"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ name })
+  })
+  if (!response.ok) {
+    throw new Error("Failed to create profile")
+  }
+  return response.json()
+}
 
 function App() {
   const [count, setCount] = useState(0)
   const [profiles, setProfiles] = useState([])
+  const [experiences, setExperiences] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [newProfileName, setNewProfileName] = useState("")
 
   useEffect(() => {
     setLoading(true)
@@ -25,6 +42,31 @@ function App() {
       .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
       .finally(() => setLoading(false))
   }, []);
+
+  useEffect(() => {
+    const experiencesPath = buildUrl(`profiles/${HARDCODED_PROFILE_ID}/experiences`)
+
+    fetch(buildUrl(experiencesPath))
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch experiences")
+        }
+        return response.json()
+      })
+      .then(data => setExperiences(data))
+      .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
+      .finally(() => setLoading(false))
+  }, []);
+
+  async function handleCreateProfile() {
+    try {
+      const created = await createProfile(newProfileName.trim())
+      setProfiles((prev) => [...prev, created]) // or [...prev, created].sort((a,b)=>a.id-b.id)
+      setNewProfileName('')
+    } catch (e) {
+      // set error state if you want
+    }
+  }
 
   return (
     <>
@@ -46,12 +88,9 @@ function App() {
         >
           Count is {count}
         </button>
-        <h1 className="text-3xl font-bold underline text-black">
+        <h2 className="text-3xl font-bold">
           Hello world!!
-        </h1>
-        <h1 className="text-3xl font-bold underline text-black">
-          console.log(buildUrl("profiles"))
-        </h1>
+        </h2>
         <p>
           {loading ? "Loading..." : error ? "Error: " + error : "No error"}
           {profiles.map(profile => (
@@ -63,6 +102,17 @@ function App() {
       </section>
 
       <div className="ticks"></div>
+
+      <section id="profiles">
+        <h2>Profiles</h2>
+        <input 
+          type="text" 
+          placeholder="Create new profile" 
+          value={newProfileName}
+          onChange={e => setNewProfileName(e.target.value)}
+        />
+        <button onClick={void handleCreateProfile()} className="cursor-pointer bg-blue-300 rounded-2xl px-4 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
+      </section>
 
       <div className="ticks"></div>
       <section id="spacer"></section>
