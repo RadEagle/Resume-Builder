@@ -75,4 +75,5 @@ async def health_db():
         raise HTTPException(status_code=503, detail="Database unavailable")
 
 # 5. Run the code
+# source .venv/Scripts/activate
 # uvicorn main:app --reload --port 8000
