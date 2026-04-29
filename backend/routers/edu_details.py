@@ -19,7 +19,7 @@ async def list_education_details(profile_id: int, experience_id: int):
             async with conn.cursor(row_factory=dict_row) as cur:
                 await cur.execute(
                     '''
-                    SELECT experience_id, gpa FROM education_detail
+                    SELECT experience_id, degree, major, gpa FROM education_detail
                     WHERE experience_id = %s
                     ''',
                     (experience_id,),
@@ -40,11 +40,11 @@ async def create_education_detail(profile_id: int, experience_id: int, body: Edu
             async with conn.cursor(row_factory=dict_row) as cur:
                 await cur.execute(
                     '''
-                    INSERT INTO education_detail (experience_id, gpa)
-                    VALUES (%s, %s)
-                    RETURNING experience_id, gpa
+                    INSERT INTO education_detail (experience_id, degree, major, gpa)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING experience_id, degree, major, gpa
                     ''',
-                    (experience_id, body.gpa),
+                    (experience_id, body.degree, body.major, body.gpa),
                 )
                 row = await cur.fetchone()
         return EduDetailRead(**row)

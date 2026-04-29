@@ -13,7 +13,7 @@ CREATE TABLE experience (
     title TEXT,
     organization TEXT,
     location TEXT,
-    kind TEXT NOT NULL CHECK (kind IN ('school', 'work', 'side_project')),
+    kind TEXT NOT NULL CHECK (kind IN ('work', 'school','side_project')),
     start_date DATE NOT NULL,
     end_date DATE,
     CONSTRAINT fk_profile
@@ -35,6 +35,8 @@ CREATE TABLE experience_bullet (
 
 CREATE TABLE education_detail (
     experience_id INT PRIMARY KEY,
+    degree TEXT NOT NULL,
+    major TEXT,
     gpa NUMERIC(4, 3) NULL,
     CONSTRAINT fk_experience
     FOREIGN KEY (experience_id)

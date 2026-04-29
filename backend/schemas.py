@@ -53,12 +53,16 @@ class BulletRead(BaseModel):
 
 # EduDetailCreate
 class EduDetailCreate(BaseModel):
-    gpa: float | None
+    degree: str = Field(..., min_length=1, max_length=30)
+    major: str | None = Field(None, max_length=30)
+    gpa: float | None = Field(None, ge=0.000, le=4.000, multiple_of=0.001)
 
 
 # EduDetailRead
 class EduDetailRead(BaseModel):
     experience_id: int
+    degree: str
+    major: str | None
     gpa: float | None
 
 
