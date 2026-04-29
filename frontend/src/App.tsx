@@ -8,9 +8,11 @@ function App() {
     <>
       <ViteStarter />
       <div className="ticks"></div>
-      <Profiles />
-      <div className="ticks"></div>
-      <Experiences />
+      <section id="main-content" className="flex gap-4 justify-center">
+        <Profiles />
+        <Experiences />
+      </section>
+      
       <div className="ticks"></div>
       <ViteNextSteps />
       <div className="ticks"></div>

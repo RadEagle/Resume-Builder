@@ -93,80 +93,81 @@ function Experiences() {
   
     return (
       <>
-        <section id="center" className="m-4">
-          <h2 className="font-bold">
-            Experiences List for Profile {HARDCODED_PROFILE_ID}
-          </h2>
-          <div>
-            {loading ? "Loading..." : error ? "Error: " + error : "No error"}
-            {experiences.map(experience => (
-              <div key={experience.id}>
-                <h2>{experience.title}</h2>
-                <p>{experience.organization}</p>
-              </div>
-            ))}
+        <section id="experiences" className="m-4">
+          <div id="center" className="m-4">
+            <h2 className="font-bold">
+              Experiences List for Profile {HARDCODED_PROFILE_ID}
+            </h2>
+            <div>
+              {loading ? "Loading..." : error ? "Error: " + error : "No error"}
+              {experiences.map(experience => (
+                <div key={experience.id}>
+                  <h2>{experience.title}</h2>
+                  <p>{experience.organization}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+    
+          <div id="create-experience" className="m-4 flex flex-col gap-2">
+            <h2>Create Experience</h2>
+            <input 
+              type="text" 
+              placeholder="Enter experience title..." 
+              value={newExperienceTitle}
+              onChange={e => setNewExperienceTitle(e.target.value)}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+            />
+            <input 
+              type="text" 
+              placeholder="Enter experience organization..." 
+              value={newExperienceOrganization}
+              onChange={e => setNewExperienceOrganization(e.target.value)}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+            />
+            <input 
+              type="text" 
+              placeholder="Enter experience location..." 
+              value={newExperienceLocation}
+              onChange={e => setNewExperienceLocation(e.target.value)}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+            />
+            <select 
+              name="experience-kind" 
+              id="experience-kind"
+              value={newExperienceKind}
+              onChange={e => setNewExperienceKind(e.target.value)}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+            >
+              <option value="work">Work</option>
+              <option value="school">School</option>
+              <option value="side_project">Side Project</option>
+            </select>
+            <input 
+              type="text" 
+              placeholder="Enter degree..." 
+              value={newDegree}
+              onChange={e => setNewDegree(e.target.value)}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+            />
+            <input 
+              type="text" 
+              placeholder="Enter major..." 
+              value={newMajor}
+              onChange={e => setNewMajor(e.target.value)}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+            />
+            <input 
+              type="text" 
+              placeholder="Enter GPA..." 
+              value={newGPA}
+              onChange={e => setNewGPA(Number(e.target.value))}
+              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+            />
+            <button onClick={() => void handleCreateExperience()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
           </div>
         </section>
-  
-        <div className="ticks"></div>
-  
-        <section id="create-experience" className="m-4">
-          <h2>Create Experience</h2>
-          <input 
-            type="text" 
-            placeholder="Enter experience title..." 
-            value={newExperienceTitle}
-            onChange={e => setNewExperienceTitle(e.target.value)}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          />
-          <input 
-            type="text" 
-            placeholder="Enter experience organization..." 
-            value={newExperienceOrganization}
-            onChange={e => setNewExperienceOrganization(e.target.value)}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          />
-          <input 
-            type="text" 
-            placeholder="Enter experience location..." 
-            value={newExperienceLocation}
-            onChange={e => setNewExperienceLocation(e.target.value)}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          />
-          <select 
-            name="experience-kind" 
-            id="experience-kind"
-            value={newExperienceKind}
-            onChange={e => setNewExperienceKind(e.target.value)}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          >
-            <option value="work">Work</option>
-            <option value="school">School</option>
-            <option value="side_project">Side Project</option>
-          </select>
-          <input 
-            type="text" 
-            placeholder="Enter degree..." 
-            value={newDegree}
-            onChange={e => setNewDegree(e.target.value)}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          />
-          <input 
-            type="text" 
-            placeholder="Enter major..." 
-            value={newMajor}
-            onChange={e => setNewMajor(e.target.value)}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          />
-          <input 
-            type="text" 
-            placeholder="Enter GPA..." 
-            value={newGPA}
-            onChange={e => setNewGPA(Number(e.target.value))}
-            className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-          />
-          <button onClick={() => void handleCreateExperience()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
-        </section>
+        
       </>
     )
 }
