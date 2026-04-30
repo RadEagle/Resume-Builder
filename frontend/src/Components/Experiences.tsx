@@ -161,7 +161,7 @@ function Experiences() {
               type="text" 
               placeholder="Enter GPA..." 
               value={newGPA}
-              onChange={e => setNewGPA(Number(e.target.value))}
+              onChange={e => setNewGPA(e.target.value)}
               className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
             />
             <button onClick={() => void handleCreateExperience()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
