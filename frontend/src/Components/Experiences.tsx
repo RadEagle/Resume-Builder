@@ -1,19 +1,10 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
 import { HARDCODED_PROFILE_ID } from '../config.ts'
-import { Schemas } from '../types.ts'
+import { Schemas, type ExperienceCreate } from '../types.ts'
 
 
-async function createExperience(profile_id: string, title: string, organization: string, location: string, kind: string, start_date: Date, end_date: Date) {
-    const experiencePayload = Schemas.ExperienceCreateSchema.parse({
-        title: title.trim(),
-        organization: organization.trim(),
-        location: location.trim(),
-        kind: kind,
-        start_date: start_date.toISOString().split('T')[0],
-        end_date: end_date.toISOString().split('T')[0]
-    })
-
+async function createExperience(profile_id: string, experiencePayload: ExperienceCreate) {
     const response = await fetch(buildUrl(`profiles/${profile_id}/experiences`), {
       method: "POST",
       headers: {
@@ -30,7 +21,7 @@ async function createExperience(profile_id: string, title: string, organization:
 async function createEducationDetail(profile_id: string, experience_id: string, degree: string, major: string, gpa: string) {
     const educationDetailPayload = Schemas.EduDetailCreateSchema.parse({
         degree: degree.trim(),
-        major: major.trim(),
+        major: major.trim() || undefined,
         gpa: gpa.trim() === "" ? undefined : Number(gpa.trim())
     })
 
@@ -56,8 +47,8 @@ function Experiences() {
     const [newDegree, setNewDegree] = useState("")
     const [newMajor, setNewMajor] = useState("")
     const [newGPA, setNewGPA] = useState("")
-    const [newStartDate, setNewStartDate] = useState(new Date())
-    const [newEndDate, setNewEndDate] = useState(new Date())
+    const [newStartDate, setNewStartDate] = useState("")
+    const [newEndDate, setNewEndDate] = useState("")
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
   
@@ -83,7 +74,20 @@ function Experiences() {
   
     async function handleCreateExperience() {
       try {
-        const newExperience = await createExperience(HARDCODED_PROFILE_ID.toString(), newExperienceTitle.trim(), newExperienceOrganization.trim(), newExperienceLocation.trim(), newExperienceKind, newStartDate, newEndDate)
+        let safeExperienceTitle = newExperienceKind === "work" || newExperienceKind === "side_project" ? newExperienceTitle.trim() : undefined
+        let safeExperienceOrganization = newExperienceKind === "work" || newExperienceKind === "school" ? newExperienceOrganization.trim() : undefined
+        let safeExperienceLocation = newExperienceKind === "work" || newExperienceKind === "school" ? newExperienceLocation.trim() : undefined
+        
+        const experiencePayload = Schemas.ExperienceCreateSchema.parse({
+          title: safeExperienceTitle,
+          organization: safeExperienceOrganization,
+          location: safeExperienceLocation,
+          kind: newExperienceKind,
+          start_date: newStartDate,
+          end_date: newEndDate === "" ? undefined : newEndDate
+      })
+  
+        const newExperience = await createExperience(HARDCODED_PROFILE_ID.toString(), experiencePayload)
   
         if (newExperienceKind === 'school') {
           await createEducationDetail(HARDCODED_PROFILE_ID.toString(), newExperience.id.toString(), newDegree.trim(), newMajor.trim(), newGPA.trim())
@@ -97,8 +101,8 @@ function Experiences() {
         setNewDegree('')
         setNewMajor('')
         setNewGPA('')
-        setNewStartDate(new Date())
-        setNewEndDate(new Date())
+        setNewStartDate("")
+        setNewEndDate("")
       } catch (e) {
         // set error state if you want
       }
@@ -122,77 +126,113 @@ function Experiences() {
             </div>
           </div>
     
-          <div id="create-experience" className="m-4 flex flex-col gap-2">
+          <div id="create-experience">
             <h2>Create Experience</h2>
-            <select 
-              name="experience-kind" 
-              id="experience-kind"
-              value={newExperienceKind}
-              onChange={e => setNewExperienceKind(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+            <form
+              className="m-4 flex flex-col gap-2"
+              onSubmit={e => {
+                e.preventDefault()
+                void handleCreateExperience()
+              }}
             >
-              <option value="work">Work</option>
-              <option value="school">School</option>
-              <option value="side_project">Side Project</option>
-            </select>
-            <input 
-              type="text" 
-              placeholder="Enter experience title..." 
-              value={newExperienceTitle}
-              onChange={e => setNewExperienceTitle(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter experience organization..." 
-              value={newExperienceOrganization}
-              onChange={e => setNewExperienceOrganization(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter experience location..." 
-              value={newExperienceLocation}
-              onChange={e => setNewExperienceLocation(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter degree..." 
-              value={newDegree}
-              onChange={e => setNewDegree(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter major..." 
-              value={newMajor}
-              onChange={e => setNewMajor(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter GPA..." 
-              value={newGPA}
-              onChange={e => setNewGPA(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="date"
-              required
-              placeholder="Enter start date..." 
-              value={newStartDate.toISOString().split('T')[0]}
-              onChange={e => setNewStartDate(new Date(e.target.value))}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="date" 
-              placeholder="Enter end date..." 
-              value={newEndDate.toISOString().split('T')[0]}
-              onChange={e => setNewEndDate(new Date(e.target.value))}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <button onClick={() => void handleCreateExperience()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
+              <select 
+                name="experience-kind" 
+                id="experience-kind"
+                value={newExperienceKind}
+                onChange={e => setNewExperienceKind(e.target.value)}
+                className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+              >
+                <option value="work">Work</option>
+                <option value="school">School</option>
+                <option value="side_project">Side Project</option>
+              </select>
+              {
+                newExperienceKind === "work" || newExperienceKind === "side_project" ? 
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter experience title..." 
+                  value={newExperienceTitle}
+                  onChange={e => setNewExperienceTitle(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+              }
+              {
+                newExperienceKind === "work" || newExperienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter experience organization..." 
+                  value={newExperienceOrganization}
+                  onChange={e => setNewExperienceOrganization(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+              }
+              {
+                newExperienceKind === "work" || newExperienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter experience location..." 
+                  value={newExperienceLocation}
+                  onChange={e => setNewExperienceLocation(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+              }
+              {
+                newExperienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter degree..." 
+                  value={newDegree}
+                  onChange={e => setNewDegree(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+              }
+              {
+                newExperienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  placeholder="Enter major..." 
+                  value={newMajor}
+                  onChange={e => setNewMajor(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+              }
+              {
+                newExperienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  placeholder="Enter GPA..." 
+                  value={newGPA}
+                  onChange={e => setNewGPA(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+              }
+              <input 
+                type="date"
+                required
+                placeholder="Enter start date..." 
+                value={newStartDate}
+                onChange={e => setNewStartDate(e.target.value)}
+                className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+              />
+              <input 
+                type="date" 
+                placeholder="Enter end date..." 
+                value={newEndDate}
+                onChange={e => setNewEndDate(e.target.value)}
+                className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+              />
+              <button type="submit" className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
+            </form>
           </div>
         </section>
         
