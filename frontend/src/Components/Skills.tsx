@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
 import { HARDCODED_PROFILE_ID } from '../config'
+import { Schemas } from '../types'
 
 
 async function createSkill(profile_id: string, name: string, category: string) {
     const skillPath = buildUrl(`profiles/${profile_id}/skills`)
+    const skillPayload = Schemas.SkillCreateSchema.parse({
+        name: name.trim(),
+        category: category.trim()
+    })
+
     const response = await fetch(skillPath, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ 
-        name: name,
-        category: category
-      })
+      body: JSON.stringify(skillPayload)
     })
     if (!response.ok) {
       throw new Error("Failed to create skill")
@@ -40,7 +43,10 @@ function Skills() {
           }
           return response.json()
         })
-        .then(data => setSkills(data))
+        .then(data => {
+          const parsed = Schemas.SkillReadSchema.array().safeParse(data)
+          setSkills(parsed.success ? parsed.data : [])
+        })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
     }, []);
@@ -61,7 +67,7 @@ function Skills() {
         <section id="skills" className="m-4 flex flex-col gap-4">
           <div className="m-4">
             <h2 className="font-bold">
-              Skills List
+              Skills List for Profile {HARDCODED_PROFILE_ID}
             </h2>
             <p>
               {loading ? "Loading..." : error ? "Error: " + error : "No error"}

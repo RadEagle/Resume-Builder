@@ -58,14 +58,18 @@ export const Schemas = {
 
     // EduDetailCreate
     EduDetailCreateSchema: z.object({
-        gpa: z.float32().optional()
+        degree: z.string().trim().min(1).max(30),
+        major: z.string().trim().max(30).optional(),
+        gpa: z.coerce.number().min(0).max(4).optional(),
     }),
 
 
     // EduDetailRead
     EduDetailReadSchema: z.object({
         experience_id: z.int(),
-        gpa: z.float32().optional(),
+        degree: z.string(),
+        major: z.string().optional(),
+        gpa: z.coerce.number().min(0).max(4).optional(),
     }),
 
 

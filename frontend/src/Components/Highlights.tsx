@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
-import { Schemas } from '../types.ts'
+import { Schemas, type BulletRead, type CourseRead } from '../types.ts'
 import { HARDCODED_PROFILE_ID } from '../config.ts'
 
 
@@ -44,7 +44,7 @@ async function createCourse(profile_id: string, experience_id: string, name: str
 }
 
 function Highlights() {
-    const [highlights, setHighlights] = useState([])
+    const [highlights, setHighlights] = useState<(BulletRead | CourseRead)[]>([])
     const [experiences, setExperiences] = useState([])
     const [experienceId, setExperienceId] = useState("")
     const [experienceKind, setExperienceKind] = useState("")
@@ -84,7 +84,17 @@ function Highlights() {
           }
           return response.json()
         })
-        .then(data => setHighlights(data))
+        .then(data => {
+            let parsed = null
+            if (selectedExperienceKind === "school") {
+                parsed = Schemas.CourseReadSchema.array().safeParse(data)
+            } else {
+                parsed = Schemas.BulletReadSchema.array().safeParse(data)
+            }
+            if (parsed !== null) {
+                setHighlights(parsed.success ? parsed.data : [])
+            }
+        })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
     }, [experienceId]);
@@ -134,11 +144,14 @@ function Highlights() {
             </h2>
             <div>
               {loading ? "Loading..." : error ? "Error: " + error : "No error"}
-              {highlights.map(highlight => (
+              {experienceKind === "school" ? highlights.map((highlight: CourseRead) => (
                 <div key={highlight.id}>
                     <h2>{highlight.name}</h2>
-                    <p>{highlight.body}</p>
                     <p>{highlight.code}</p>
+                </div>
+              )) : highlights.map((highlight: BulletRead) => (
+                <div key={highlight.id}>
+                    <h2>{highlight.body}</h2>
                 </div>
               ))}
             </div>

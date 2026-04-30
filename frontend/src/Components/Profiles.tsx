@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
+import { Schemas } from '../types'
 
 async function createProfile(name: string) {
+    const profilePayload = Schemas.ProfileCreateSchema.parse({
+        name: name.trim()
+    })
+
     const response = await fetch(buildUrl("profiles"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ 
-        name: name 
-      })
+      body: JSON.stringify(profilePayload)
     })
     if (!response.ok) {
       throw new Error("Failed to create profile")
@@ -33,7 +36,10 @@ function Profiles() {
           }
           return response.json()
         })
-        .then(data => setProfiles(data))
+        .then(data => {
+          const parsed = Schemas.ProfileReadSchema.array().safeParse(data)
+          setProfiles(parsed.success ? parsed.data : [])
+        })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
     }, []);
