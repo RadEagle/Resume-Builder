@@ -72,7 +72,7 @@ function Profiles() {
             ))}
           </div>
     
-          <div id="profile-creation" className="m-4">
+          <div id="profile-creation" className="m-4 flex flex-col gap-2">
             <h2>Create Profile</h2>
             <input 
               type="text" 

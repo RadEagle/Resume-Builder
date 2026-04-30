@@ -99,7 +99,7 @@ function Skills() {
             </div>
           </div>
     
-          <div id="skill-creation" className="m-4">
+          <div id="skill-creation" className="m-4 flex flex-col gap-2">
             <h2>Create Skill</h2>
             <input 
               type="text" 
