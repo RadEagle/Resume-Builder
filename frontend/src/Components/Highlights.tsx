@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
+import { Schemas } from '../types.ts'
 import { HARDCODED_PROFILE_ID } from '../config.ts'
 
 
-async function createHighlight(profile_id: string, experience_id: string, body: string, sort_order: number) {
+async function createHighlight(profile_id: string, experience_id: string, body: string, sortOrder: string) {
+    const bulletPayload = Schemas.BulletCreateSchema.parse({
+        body: body.trim(),
+        sort_order: sortOrder.trim() === "" ? undefined : Number(sortOrder.trim()),
+      })
+    
     const response = await fetch(buildUrl(`profiles/${profile_id}/experiences/${experience_id}/bullets`), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ 
-        body: body,
-        sort_order: sort_order
-      })
+      body: JSON.stringify(bulletPayload)
     })
     if (!response.ok) {
       throw new Error("Failed to create experience highlight")
@@ -20,17 +23,19 @@ async function createHighlight(profile_id: string, experience_id: string, body: 
     return response.json()
 }
   
-async function createCourse(profile_id: string, experience_id: string, name: string, code: string, sort_order: number) {
+async function createCourse(profile_id: string, experience_id: string, name: string, code: string, sortOrder: string) {
+    const coursePayload = Schemas.CourseCreateSchema.parse({
+        name: name.trim(),
+        code: code.trim() || undefined,
+        sort_order: sortOrder.trim() === "" ? undefined : Number(sortOrder.trim()),
+      })
+
     const response = await fetch(buildUrl(`profiles/${profile_id}/experiences/${experience_id}/courses`), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ 
-        name: name,
-        code: code,
-        sort_order: sort_order
-      })
+      body: JSON.stringify(coursePayload)
     })
     if (!response.ok) {
       throw new Error("Failed to create course")
@@ -46,7 +51,7 @@ function Highlights() {
     const [newExperienceBody, setNewExperienceBody] = useState("")
     const [newCourseName, setNewCourseName] = useState("")
     const [newCourseCode, setNewCourseCode] = useState("")
-    const [newSortOrder, setNewSortOrder] = useState(null)
+    const [newSortOrder, setNewSortOrder] = useState("")
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
   
@@ -114,7 +119,7 @@ function Highlights() {
         setNewExperienceBody('')
         setNewCourseName('')
         setNewCourseCode('')
-        setNewSortOrder(null)
+        setNewSortOrder('')
       } catch (e) {
         // set error state if you want
       }
@@ -177,7 +182,7 @@ function Highlights() {
               type="text" 
               placeholder="Enter sort order..." 
               value={newSortOrder}
-              onChange={e => setNewSortOrder(Number(e.target.value))}
+              onChange={e => setNewSortOrder(e.target.value)}
               className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
             />
             <button onClick={() => void handleCreateHighlight()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
