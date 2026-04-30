@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
-import { Schemas, type BulletRead, type CourseRead } from '../types.ts'
+import { Schemas, type BulletRead, type CourseRead, type ExperienceRead } from '../types.ts'
 import { HARDCODED_PROFILE_ID } from '../config.ts'
 
 
@@ -43,11 +43,26 @@ async function createCourse(profile_id: string, experience_id: string, name: str
     return response.json()
 }
 
+function experienceOptionLabel(
+    e: ExperienceRead,
+    schoolDegreeById: Record<number, string>,
+  ): string {
+    if (e.kind === 'work') {
+      return `${e.title ?? ''} - ${e.organization ?? ''}`.replace(/\s*-\s*$/, '').trim()
+    }
+    if (e.kind === 'school') {
+      const deg = schoolDegreeById[e.id] ?? ''
+      return `${e.organization ?? ''} - ${deg}`.replace(/\s*-\s*$/, '').trim()
+    }
+    return (e.title ?? '').trim()
+}
+
 function Highlights() {
     const [highlights, setHighlights] = useState<(BulletRead | CourseRead)[]>([])
     const [experiences, setExperiences] = useState([])
     const [experienceId, setExperienceId] = useState("")
     const [experienceKind, setExperienceKind] = useState("")
+    const [schoolDegreeById, setSchoolDegreeById] = useState({})
     const [newExperienceBody, setNewExperienceBody] = useState("")
     const [newCourseName, setNewCourseName] = useState("")
     const [newCourseCode, setNewCourseCode] = useState("")
@@ -59,6 +74,7 @@ function Highlights() {
       setLoading(true)
       setError(null)
       if (experienceId === "") {
+        setLoading(false)
         return
       }
 
@@ -97,7 +113,7 @@ function Highlights() {
         })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
-    }, [experienceId]);
+    }, [experienceId, experiences]);
 
     useEffect(() => {
         setLoading(true)
@@ -111,10 +127,42 @@ function Highlights() {
             }
             return response.json()
           })
-          .then(data => setExperiences(data))
+          .then(data => {
+            const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
+            setExperiences(parsed.success ? parsed.data : [])
+          })
           .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
           .finally(() => setLoading(false))
     }, []);
+
+    useEffect(() => {
+        if (!experiences.length) {
+          setSchoolDegreeById({})
+          return
+        }
+        let cancelled = false
+        const schools = experiences.filter((e) => e.kind === 'school')
+        void Promise.all(
+          schools.map(async (e) => {
+            const res = await fetch(
+              buildUrl(
+                `profiles/${HARDCODED_PROFILE_ID}/experiences/${e.id}/edu-details`,
+              ),
+            )
+            if (!res.ok) return [e.id, ''] as const
+            const data = await res.json()
+            const parsed = Schemas.EduDetailReadSchema.array().safeParse(data)
+            const deg =
+              parsed.success && parsed.data[0] ? parsed.data[0].degree : ''
+            return [e.id, deg] as const
+          }),
+        ).then((pairs) => {
+          if (!cancelled) setSchoolDegreeById(Object.fromEntries(pairs))
+        })
+        return () => {
+          cancelled = true
+        }
+      }, [experiences])
   
     async function handleCreateHighlight() {
       try {
@@ -166,31 +214,45 @@ function Highlights() {
               className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
             >
               <option value="">Select an experience</option>
-              {experiences.map(experience => (
-                <option key={experience.id} value={experience.id}>{experience.title} - {experience.organization}</option>
+              {experiences.map(e => (
+                <option key={e.id} value={e.id}>{experienceOptionLabel(e, schoolDegreeById)}</option>
               ))}
             </select>
-            <textarea 
-              rows={4}
-              placeholder="Enter experience body..." 
-              value={newExperienceBody}
-              onChange={e => setNewExperienceBody(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter course name..." 
-              value={newCourseName}
-              onChange={e => setNewCourseName(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
-            <input 
-              type="text" 
-              placeholder="Enter course code..." 
-              value={newCourseCode}
-              onChange={e => setNewCourseCode(e.target.value)}
-              className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
-            />
+            {
+                experienceKind === "work" || experienceKind === "side_project" ? 
+                <textarea 
+                  rows={4}
+                  required
+                  placeholder="Enter experience body..." 
+                  value={newExperienceBody}
+                  onChange={e => setNewExperienceBody(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+            }
+            {
+                experienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  required
+                  placeholder="Enter course name..." 
+                  value={newCourseName}
+                  onChange={e => setNewCourseName(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+            }
+            {
+                experienceKind === "school" ? 
+                <input 
+                  type="text" 
+                  placeholder="Enter course code..." 
+                  value={newCourseCode}
+                  onChange={e => setNewCourseCode(e.target.value)}
+                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                />
+                : null
+            }
             <input 
               type="text" 
               placeholder="Enter sort order..." 
