@@ -31,12 +31,12 @@ export const Schemas = {
     ExperienceReadSchema: z.object({
         id: z.int(),
         profile_id: z.int(),
-        title: z.string().optional(),
-        organization: z.string().optional(),
-        location: z.string().optional(),
+        title: z.string().nullable().optional(),
+        organization: z.string().nullable().optional(),
+        location: z.string().nullable().optional(),
         kind: z.enum(['school', 'work', 'side_project']),
         start_date: z.coerce.date(),
-        end_date: z.coerce.date().optional()
+        end_date: z.coerce.date().nullable().optional()
     }),
 
 
