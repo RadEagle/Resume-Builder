@@ -11,6 +11,7 @@ class ProfileCreate(BaseModel):
 # ProfileRead
 class ProfileRead(BaseModel):
     id: int
+    user_id: int
     name: str
     created_at: datetime
 

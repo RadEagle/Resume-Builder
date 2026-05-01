@@ -1,10 +1,22 @@
 -- connect to postgres
 -- CREATE DATABASE resume_vault;
 
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE resume_profile (
 	id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
 	name TEXT NOT NULL,
-	created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT fk_user
+    FOREIGN KEY (user_id)
+    REFERENCES resume_profile(id)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE experience (
@@ -67,6 +79,7 @@ CREATE TABLE skill (
     ON DELETE CASCADE
 );
 
+CREATE INDEX idx_resume_profile_user_id ON resume_profile (user_id);
 CREATE INDEX idx_experience_profile_id ON experience (profile_id);
 CREATE INDEX idx_experience_bullet_experience_id ON experience_bullet (experience_id);
 CREATE INDEX idx_education_course_experience_id ON education_course (experience_id);

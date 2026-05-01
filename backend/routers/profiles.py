@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from database import pool
 from schemas import ProfileCreate, ProfileRead
 from psycopg.rows import dict_row
+import routers.utilities as utilities
 
 
 router = APIRouter(prefix="/profiles", tags=["profiles"])
@@ -26,16 +27,18 @@ async def list_profiles():
 
 @router.post("", response_model=ProfileRead)
 async def create_profile(body: ProfileCreate):
+    owner = await utilities.get_owner()
+
     try:
         async with pool.connection() as conn:
             async with conn.cursor(row_factory=dict_row) as cur:
                 await cur.execute(
                     '''
-                    INSERT INTO resume_profile (name)
-                    VALUES (%s)
-                    RETURNING id, name, created_at
+                    INSERT INTO resume_profile (user_id, name)
+                    VALUES (%s, %s)
+                    RETURNING id, user_id, name, created_at
                     ''',
-                    (body.name,),
+                    (owner['id'], body.name),
                 )
                 row = await cur.fetchone()
         return ProfileRead(**row)

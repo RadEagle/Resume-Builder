@@ -44,3 +44,23 @@ async def ensure_exp_id_exists(profile_id: int, experience_id: int):
     if not row:
         raise HTTPException(status_code=404, detail="Experience not found")
 
+
+async def get_owner():
+    try:
+        async with pool.connection() as conn:
+            async with conn.cursor(row_factory=dict_row) as cur:
+                await cur.execute(
+                    '''
+                    SELECT id FROM users
+                    ORDER BY id LIMIT 1
+                    ''',
+                )
+                owner = await cur.fetchone()
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    if not owner:
+        raise HTTPException(status_code=404, detail="Owner missing")
+
+    return owner
