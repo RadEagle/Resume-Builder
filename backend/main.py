@@ -8,6 +8,7 @@ from routers.bullets import router as bullets_router
 from routers.edu_details import router as edu_details_router
 from routers.courses import router as courses_router
 from routers.skills import router as skills_router
+from routers.auth import router as auth_router
 
 
 # 1. Define the lifespan manager <& CODING PATTERN &>
@@ -50,6 +51,7 @@ app.include_router(bullets_router, prefix="/api")
 app.include_router(edu_details_router, prefix="/api")
 app.include_router(courses_router, prefix="/api")
 app.include_router(skills_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
 
 # 4. Set up the app factory
 @app.get("/")

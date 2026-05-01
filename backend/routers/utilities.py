@@ -75,13 +75,13 @@ async def check_duplicate_email(email: str):
                     SELECT email FROM users
                     WHERE LOWER(email) = LOWER(%s)
                     ORDER BY id LIMIT 1
-                    '''
+                    ''',
                     (email,),
                 )
-                email = await cur.fetchone()
+                email_exists = await cur.fetchone()
     except Exception as e:
         print(repr(e))
         raise HTTPException(status_code=503, detail="Database unavailable")
 
-    if email:
+    if email_exists:
         raise HTTPException(status_code=409, detail="Email already used")
