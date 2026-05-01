@@ -64,3 +64,24 @@ async def get_owner():
         raise HTTPException(status_code=404, detail="Owner missing")
 
     return owner
+
+
+async def check_duplicate_email(email: str):
+    try:
+        async with pool.connection() as conn:
+            async with conn.cursor(row_factory=dict_row) as cur:
+                await cur.execute(
+                    '''
+                    SELECT email FROM users
+                    WHERE LOWER(email) = LOWER(%s)
+                    ORDER BY id LIMIT 1
+                    '''
+                    (email,),
+                )
+                email = await cur.fetchone()
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    if email:
+        raise HTTPException(status_code=409, detail="Email already used")

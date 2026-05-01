@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 from typing import Literal, Optional
 
 
@@ -95,3 +95,29 @@ class SkillRead(BaseModel):
     profile_id: int
     name: str
     category: Literal["technical", "soft", "interest"]
+
+
+# UserRegister
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+
+
+# UserLogin
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
+
+
+# UserRead
+class UserRead(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
+
+
+# TokenResponse
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"]
+    user: UserRead

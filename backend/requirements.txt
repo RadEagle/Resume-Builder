@@ -3,3 +3,6 @@ uvicorn[standard]
 psycopg[binary]
 psycopg-pool
 python-dotenv
+bcrypt
+pyjwt
+email-validator
