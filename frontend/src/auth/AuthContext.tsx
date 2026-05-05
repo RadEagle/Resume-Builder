@@ -1,20 +1,19 @@
 import { createContext, useContext, useState } from "react"
 import type { UserRead } from "../types"
 import { buildUrl } from "../api"
+import { Schemas } from "../types"
 
 
-// Create Auth Context to hold default values
-const AuthContext = createContext<{
+type AuthValue = {
     user: UserRead | null
     token: string | null
     login: (email: string, password: string) => Promise<void>
     logout: () => void
-}>({
-    user: null,
-    token: null,
-    login: async () => {},
-    logout: () => {}
-})
+}
+
+
+// Create Auth Context to hold undefined values
+const AuthContext = createContext<AuthValue | undefined>(undefined)
 
 
 // Create Auth Provider
@@ -23,10 +22,33 @@ const AuthProvider = ({ children }) => {
     const [token, setToken] = useState<string | null>(null)
 
     const login = async (email: string, password: string) => {
+        const userPayload = Schemas.UserLoginSchema.parse({
+            email: email.trim(),
+            password: password.trim()
+        })
+
         const response = await fetch(buildUrl("auth/login"), {
             method: "POST",
-            body: JSON.stringify({ email, password })
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(userPayload)
         })
+
+        if (!response.ok) {
+            console.error("Login failed", response.statusText)
+            throw new Error("Login failed")
+        }
+
+        const data = await response.json()
+        const parsed = Schemas.TokenResponseSchema.safeParse(data)
+        if (!parsed.success) {
+            console.error("Invalid response format", parsed.error)
+            throw new Error("Invalid response format")
+        }
+
+        setUser(parsed.data.user)
+        setToken(parsed.data.access_token)
     }
 
     const logout = () => {
@@ -45,7 +67,7 @@ const AuthProvider = ({ children }) => {
 // create custom React hook useAuth
 const useAuth = () => {
     const context = useContext(AuthContext)
-    if (!context) {
+    if (context === undefined) {
         throw new Error("useAuth must be used within an AuthProvider")
     }
     return context
