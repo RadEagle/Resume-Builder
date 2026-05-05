@@ -6,15 +6,17 @@ import { useAuth } from '../auth/AuthContext'
 function Authorization() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState(null)
     const { login } = useAuth()
   
     async function handleLogin() {
       try {
-        const response = await login(email, password)
+        const userPayload = Schemas.UserLoginSchema.parse({
+            email: email.trim(),
+            password: password.trim()
+        })
+
+        const response = await login(userPayload)
         console.log(response)
-        setLoading(false)
       } catch (e) {
         // set error state if you want
       }

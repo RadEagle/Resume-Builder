@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react"
-import type { UserRead } from "../types"
+import type { UserRead, UserLogin } from "../types"
 import { buildUrl } from "../api"
 import { Schemas } from "../types"
 
@@ -7,7 +7,7 @@ import { Schemas } from "../types"
 type AuthValue = {
     user: UserRead | null
     token: string | null
-    login: (email: string, password: string) => Promise<void>
+    login: (payload: UserLogin) => Promise<void>
     logout: () => void
 }
 
@@ -21,18 +21,13 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState<UserRead | null>(null)
     const [token, setToken] = useState<string | null>(null)
 
-    const login = async (email: string, password: string) => {
-        const userPayload = Schemas.UserLoginSchema.parse({
-            email: email.trim(),
-            password: password.trim()
-        })
-
+    const login = async (payload: UserLogin) => {
         const response = await fetch(buildUrl("auth/login"), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(userPayload)
+            body: JSON.stringify(payload)
         })
 
         if (!response.ok) {
