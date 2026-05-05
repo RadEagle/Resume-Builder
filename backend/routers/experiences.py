@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from database import pool
 from schemas import ExperienceCreate, ExperienceRead
 from psycopg.rows import dict_row
 import routers.utilities as utilities
+from security import current_user_id
 
 
 router = APIRouter(
@@ -11,8 +12,8 @@ router = APIRouter(
 )
 
 @router.get("", response_model=list[ExperienceRead])
-async def list_experiences(profile_id: int):
-    await utilities.ensure_profile_id_exists(profile_id)
+async def list_experiences(profile_id: int, user_id: int = Depends(current_user_id)):
+    await utilities.ensure_profile_id_exists(profile_id, user_id)
     
     try:
         async with pool.connection() as conn:
@@ -33,8 +34,8 @@ async def list_experiences(profile_id: int):
 
 
 @router.post("", response_model=ExperienceRead)
-async def create_experience(profile_id: int, body: ExperienceCreate):
-    await utilities.ensure_profile_id_exists(profile_id)
+async def create_experience(profile_id: int, body: ExperienceCreate, user_id: int = Depends(current_user_id)):
+    await utilities.ensure_profile_id_exists(profile_id, user_id)
     
     try:
         async with pool.connection() as conn:

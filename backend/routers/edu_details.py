@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from database import pool
 from schemas import EduDetailCreate, EduDetailRead
 from psycopg.rows import dict_row
 import routers.utilities as utilities
+from security import current_user_id
 
 
 router = APIRouter(
@@ -11,8 +12,8 @@ router = APIRouter(
 )
 
 @router.get("", response_model=list[EduDetailRead])
-async def list_education_details(profile_id: int, experience_id: int):
-    await utilities.ensure_exp_id_exists(profile_id, experience_id)
+async def list_education_details(profile_id: int, experience_id: int, user_id: int = Depends(current_user_id)):
+    await utilities.ensure_exp_id_exists(profile_id, experience_id, user_id)
     
     try:
         async with pool.connection() as conn:
@@ -32,8 +33,8 @@ async def list_education_details(profile_id: int, experience_id: int):
 
 
 @router.post("", response_model=EduDetailRead)
-async def create_education_detail(profile_id: int, experience_id: int, body: EduDetailCreate):
-    await utilities.ensure_exp_id_exists(profile_id, experience_id)
+async def create_education_detail(profile_id: int, experience_id: int, body: EduDetailCreate, user_id: int = Depends(current_user_id)):
+    await utilities.ensure_exp_id_exists(profile_id, experience_id, user_id)
     
     try:
         async with pool.connection() as conn:

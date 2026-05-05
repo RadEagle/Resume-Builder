@@ -4,6 +4,8 @@ from pathlib import Path
 import datetime
 import bcrypt
 import jwt
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
@@ -35,3 +37,25 @@ def create_access_token(user_id: int) -> str:
     }
 
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def decode_access_token(token: str) -> dict:
+    try:
+        if not JWT_SECRET or not JWT_ALGORITHM:
+            raise HTTPException(status_code=503, detail="Missing JWT secret key and/or algorithm")
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
+def current_user_id(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer())):
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    sub = payload.get("sub")
+
+    if not sub or not sub.isdigit():
+        raise HTTPException(status_code=401, detail="Missing sub")
+
+    return int(sub)

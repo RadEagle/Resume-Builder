@@ -3,16 +3,16 @@ from database import pool
 from psycopg.rows import dict_row
 
 
-async def ensure_profile_id_exists(profile_id: int):
+async def ensure_profile_id_exists(profile_id: int, user_id):
     try:
         async with pool.connection() as conn:
             async with conn.cursor(row_factory=dict_row) as cur:
                 await cur.execute(
                     '''
                     SELECT 1 FROM resume_profile
-                    WHERE id = %s
+                    WHERE id = %s AND user_id = %s
                     ''',
-                    (profile_id,),
+                    (profile_id, user_id),
                 )
                 row = await cur.fetchone()
     except Exception as e:
@@ -23,8 +23,8 @@ async def ensure_profile_id_exists(profile_id: int):
         raise HTTPException(status_code=404, detail="Profile not found")
 
 
-async def ensure_exp_id_exists(profile_id: int, experience_id: int):
-    await ensure_profile_id_exists(profile_id)
+async def ensure_exp_id_exists(profile_id: int, experience_id: int, user_id: int):
+    await ensure_profile_id_exists(profile_id, user_id)
     
     try:
         async with pool.connection() as conn:
@@ -43,27 +43,6 @@ async def ensure_exp_id_exists(profile_id: int, experience_id: int):
 
     if not row:
         raise HTTPException(status_code=404, detail="Experience not found")
-
-
-async def get_owner():
-    try:
-        async with pool.connection() as conn:
-            async with conn.cursor(row_factory=dict_row) as cur:
-                await cur.execute(
-                    '''
-                    SELECT id FROM users
-                    ORDER BY id LIMIT 1
-                    ''',
-                )
-                owner = await cur.fetchone()
-    except Exception as e:
-        print(repr(e))
-        raise HTTPException(status_code=503, detail="Database unavailable")
-
-    if not owner:
-        raise HTTPException(status_code=404, detail="Owner missing")
-
-    return owner
 
 
 async def check_duplicate_email(email: str):
