@@ -1,6 +1,23 @@
 import { z } from "zod" // ensure the same version of Zod is used
 
 
+// Define Nested Schemas first
+// UserRead
+const UserReadSchema = z.object({
+    id: z.int(),
+    email: z.email(),
+    created_at: z.coerce.date()
+});
+
+
+// TokenResponse
+const TokenResponseSchema = z.object({
+    access_token: z.string(),
+    token_type: z.enum(["bearer"]),
+    user: UserReadSchema
+});
+
+// Export Schemas
 export const Schemas = {
     // ProfileCreate
     ProfileCreateSchema: z.object({
@@ -11,6 +28,7 @@ export const Schemas = {
     // ProfileRead
     ProfileReadSchema: z.object({
         id: z.int(),
+        user_id: z.int(),
         name: z.string(),
         created_at: z.coerce.date()
     }),
@@ -105,6 +123,24 @@ export const Schemas = {
         name: z.string(),
         category: z.enum(["technical", "soft", "interest"]),
     }),
+
+
+    // UserRegister
+    UserRegisterSchema: z.object({
+        email: z.email(),
+        password: z.string().trim().min(6)
+    }),
+
+
+    // UserLogin
+    UserLoginSchema: z.object({
+        email: z.email(),
+        password: z.string().trim().min(6)
+    }),
+
+    // Nested Schemas
+    UserReadSchema,
+    TokenResponseSchema,
 } as const;
 
 
@@ -125,3 +161,7 @@ export type CourseCreate = SchemaTypes['CourseCreateSchema'];
 export type CourseRead = SchemaTypes['CourseReadSchema'];
 export type SkillCreate = SchemaTypes['SkillCreateSchema'];
 export type SkillRead = SchemaTypes['SkillReadSchema'];
+export type UserRegister = SchemaTypes['UserRegisterSchema'];
+export type UserLogin = SchemaTypes['UserLoginSchema'];
+export type UserRead = SchemaTypes['UserReadSchema'];
+export type TokenResponse = SchemaTypes['TokenResponseSchema'];
