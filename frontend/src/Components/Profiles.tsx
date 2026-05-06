@@ -35,7 +35,14 @@ function Profiles({ onProfileChange }: ProfileProps) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
 
-    const { token } = useAuth()
+    const { user, token } = useAuth()
+
+    useEffect(() => {
+      if (user) {
+        setProfileId("")
+        onProfileChange("", "")
+      }
+    }, [user])
   
     useEffect(() => {
       setLoading(true)

@@ -1,7 +1,28 @@
 import { useState } from 'react'
-import { Schemas } from '../types'
+import { Schemas, type UserRegister } from '../types'
 import { useAuth } from '../auth/AuthContext'
+import { buildUrl } from '../api'
 
+
+async function registerUser(payload: UserRegister) {
+  try {
+    const response = await fetch(buildUrl("auth/register"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    if (!response.ok) {
+      throw new Error("Failed to register user - fetch error")
+    }
+    
+    return response.json()
+  } catch (e) {
+    throw new Error("Failed to register user - unknown error")
+  }
+  
+}
 
 function Authorization() {
     const [email, setEmail] = useState("")
@@ -17,17 +38,35 @@ function Authorization() {
 
         const response = await login(userPayload)
         console.log(response)
+
+        setEmail("")
+        setPassword("")
       } catch (e) {
         // set error state if you want
       }
     }
 
     async function handleRegister() {
-        try {
-        } catch (e) {
-          // set error state if you want
+      try {
+        const userPayload = Schemas.UserRegisterSchema.parse({
+            email: email.trim(),
+            password: password.trim()
+        })
+
+        const data = await registerUser(userPayload)
+        const parsed = Schemas.TokenResponseSchema.safeParse(data)
+        if (!parsed.success) {
+          throw new Error("Failed to register user - parse error: " + parsed.error.message)
         }
+        console.log(parsed.data)
+
+        // after registering, login the user
+        handleLogin()
+        
+      } catch (e) {
+        // set error state if you want
       }
+    }
   
     return (
       <>
