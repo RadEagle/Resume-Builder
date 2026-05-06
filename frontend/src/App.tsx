@@ -6,11 +6,13 @@ import { Experiences } from './Components/Experiences.tsx'
 import { Skills } from './Components/Skills.tsx'
 import { Highlights } from './Components/Highlights.tsx'
 import { Authorization } from './Components/Authorization.tsx'
+import { useAuth } from './auth/AuthContext.tsx'
 
 
 function App() {
   const [profileId, setProfileId] = useState<string | null>(null)
   const [profileName, setProfileName] = useState<string | null>(null)
+  const { token } = useAuth()
 
   const handleProfileChange = (profileId: string, profileName: string) => {
     setProfileId(profileId)
@@ -22,21 +24,30 @@ function App() {
       <ViteStarter />
       <div className="ticks"></div>
 
-      <section id="authorization" className="flex justify-center">
-        <Authorization />
-      </section>
+      {
+        token ? (
+          <>
+            <section id="welcome" className="flex justify-center">
+              <h1>Welcome to the Resume Builder!!</h1>
+            </section>
+            <section id="main-content" className="flex gap-4 justify-center">
+              <Profiles onProfileChange={handleProfileChange}/>
+              <Experiences profileId={profileId} profileName={profileName}/>
+            </section>
 
-      <section id="main-content" className="flex gap-4 justify-center">
-        <Profiles onProfileChange={handleProfileChange}/>
-        <Experiences profileId={profileId} profileName={profileName}/>
-      </section>
+            <div className="ticks"></div>
 
-      <div className="ticks"></div>
-
-      <section id="secondary-content" className="flex gap-4 justify-center">
-        <Skills profileId={profileId} profileName={profileName}/>
-        <Highlights profileId={profileId} profileName={profileName}/>
-      </section>
+            <section id="secondary-content" className="flex gap-4 justify-center">
+              <Skills profileId={profileId} profileName={profileName}/>
+              <Highlights profileId={profileId} profileName={profileName}/>
+            </section>
+          </>
+        ) : (
+          <section id="authorization" className="flex justify-center">
+            <Authorization />
+          </section>
+        )
+      }
 
       <div className="ticks"></div>
 
