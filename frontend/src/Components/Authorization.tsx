@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Schemas } from '../types'
 import { useAuth } from '../auth/AuthContext'
 

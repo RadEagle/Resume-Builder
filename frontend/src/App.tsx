@@ -4,12 +4,18 @@ import { Profiles } from './Components/Profiles.tsx'
 import { Experiences } from './Components/Experiences.tsx'
 import { Skills } from './Components/Skills.tsx'
 import { Highlights } from './Components/Highlights.tsx'
+import { Authorization } from './Components/Authorization.tsx'
+
 
 function App() {
   return (
     <>
       <ViteStarter />
       <div className="ticks"></div>
+
+      <section id="authorization" className="flex justify-center">
+        <Authorization />
+      </section>
 
       <section id="main-content" className="flex gap-4 justify-center">
         <Profiles />

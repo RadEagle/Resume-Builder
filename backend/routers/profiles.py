@@ -15,7 +15,7 @@ async def list_profiles(user_id: int = Depends(current_user_id)):
             async with conn.cursor(row_factory=dict_row) as cur:
                 await cur.execute(
                     '''
-                    SELECT id, name, created_at FROM resume_profile
+                    SELECT id, user_id, name, created_at FROM resume_profile
                     WHERE user_id = %s
                     ORDER by id
                     ''',
