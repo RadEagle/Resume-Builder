@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
-import { HARDCODED_PROFILE_ID } from '../config.ts'
 import { Schemas, type ExperienceCreate } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 
+
+interface ExperiencesProps {
+  profileId: string | null
+  profileName: string | null
+}
 
 async function createExperience(profile_id: string, experiencePayload: ExperienceCreate, token: string) {
     const response = await fetch(buildUrl(`profiles/${profile_id}/experiences`), {
@@ -41,7 +45,7 @@ async function createEducationDetail(profile_id: string, experience_id: string, 
     return response.json()
 }
 
-function Experiences() {
+function Experiences({ profileId, profileName }: ExperiencesProps) {
     const [experiences, setExperiences] = useState([])
     const [newExperienceTitle, setNewExperienceTitle] = useState("")
     const [newExperienceOrganization, setNewExperienceOrganization] = useState("")
@@ -61,13 +65,13 @@ function Experiences() {
       setLoading(true)
       setError(null)
 
-      if (!token)
+      if (!token || !/^\d+$/.test(profileId))
       {
         setLoading(false)
         return
       }
 
-      const experiencesPath = buildUrl(`profiles/${HARDCODED_PROFILE_ID}/experiences`)
+      const experiencesPath = buildUrl(`profiles/${profileId}/experiences`)
   
       fetch(experiencesPath, {
         headers: {
@@ -87,7 +91,7 @@ function Experiences() {
         })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
-    }, [token]);
+    }, [token, profileId]);
   
     async function handleCreateExperience() {
       if (!token) {
@@ -109,10 +113,10 @@ function Experiences() {
           end_date: newEndDate === "" ? undefined : newEndDate
       })
   
-        const newExperience = await createExperience(HARDCODED_PROFILE_ID.toString(), experiencePayload, token)
+        const newExperience = await createExperience(profileId, experiencePayload, token)
   
         if (newExperienceKind === 'school') {
-          await createEducationDetail(HARDCODED_PROFILE_ID.toString(), newExperience.id.toString(), newDegree.trim(), newMajor.trim(), newGPA.trim(), token)
+          await createEducationDetail(profileId, newExperience.id.toString(), newDegree.trim(), newMajor.trim(), newGPA.trim(), token)
         }
   
         setExperiences((prev) => [...prev, newExperience])
@@ -133,11 +137,11 @@ function Experiences() {
     return (
       <>
         {
-          token ? (
+          profileId ? (
             <section id="experiences" className="m-4">
               <div id="center" className="m-4">
                 <h2 className="font-bold">
-                  Experiences List for Profile {HARDCODED_PROFILE_ID}
+                  Experiences List for {profileName}
                 </h2>
                 <div>
                   {loading ? "Loading..." : error ? "Error: " + error : "No error"}
@@ -264,7 +268,7 @@ function Experiences() {
               <section id="experiences-offline" className="m-4 flex flex-col gap-4">
                 <div className="m-4">
                   <h2 className="font-bold">Experiences</h2>
-                  <p>You are offline. Please login to view your experiences.</p>
+                  <p>Please login select a profile to view your experiences.</p>
                 </div>
               </section>
             </>

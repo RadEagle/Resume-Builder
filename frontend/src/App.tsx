@@ -1,4 +1,5 @@
 import './App.css'
+import { useState } from 'react'
 import { ViteStarter, ViteNextSteps } from './Components/Vite.tsx'
 import { Profiles } from './Components/Profiles.tsx'
 import { Experiences } from './Components/Experiences.tsx'
@@ -8,6 +9,14 @@ import { Authorization } from './Components/Authorization.tsx'
 
 
 function App() {
+  const [profileId, setProfileId] = useState<string | null>(null)
+  const [profileName, setProfileName] = useState<string | null>(null)
+
+  const handleProfileChange = (profileId: string, profileName: string) => {
+    setProfileId(profileId)
+    setProfileName(profileName)
+  }
+
   return (
     <>
       <ViteStarter />
@@ -18,15 +27,15 @@ function App() {
       </section>
 
       <section id="main-content" className="flex gap-4 justify-center">
-        <Profiles />
-        <Experiences />
+        <Profiles onProfileChange={handleProfileChange}/>
+        <Experiences profileId={profileId} profileName={profileName}/>
       </section>
 
       <div className="ticks"></div>
 
       <section id="secondary-content" className="flex gap-4 justify-center">
-        <Skills />
-        <Highlights />
+        <Skills profileId={profileId} profileName={profileName}/>
+        <Highlights profileId={profileId} profileName={profileName}/>
       </section>
 
       <div className="ticks"></div>

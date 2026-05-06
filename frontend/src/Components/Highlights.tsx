@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
 import { Schemas, type BulletRead, type CourseRead, type ExperienceRead } from '../types.ts'
-import { HARDCODED_PROFILE_ID } from '../config.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 
+
+interface HighlightsProps {
+  profileId: string | null
+  profileName: string | null
+}
 
 async function createHighlight(profile_id: string, experience_id: string, body: string, sortOrder: string, token: string) {
     const bulletPayload = Schemas.BulletCreateSchema.parse({
@@ -60,7 +64,7 @@ function experienceOptionLabel(
     return (e.title ?? '').trim()
 }
 
-function Highlights() {
+function Highlights({ profileId, profileName }: HighlightsProps) {
     const [highlights, setHighlights] = useState<(BulletRead | CourseRead)[]>([])
     const [experiences, setExperiences] = useState([])
     const [experienceId, setExperienceId] = useState("")
@@ -78,7 +82,7 @@ function Highlights() {
     useEffect(() => {
       setLoading(true)
       setError(null)
-      if (!token)
+      if (!token || !profileId)
       {
         setLoading(false)
         return
@@ -93,9 +97,9 @@ function Highlights() {
 
       let highlightsPath = null
       if (selectedExperienceKind === "work" || selectedExperienceKind === "side_project") {
-        highlightsPath = buildUrl(`profiles/${HARDCODED_PROFILE_ID}/experiences/${experienceId}/bullets`)
+        highlightsPath = buildUrl(`profiles/${profileId}/experiences/${experienceId}/bullets`)
       } else if (selectedExperienceKind === "school") {
-        highlightsPath = buildUrl(`profiles/${HARDCODED_PROFILE_ID}/experiences/${experienceId}/courses`)
+        highlightsPath = buildUrl(`profiles/${profileId}/experiences/${experienceId}/courses`)
       }
 
       setExperienceKind(selectedExperienceKind)
@@ -129,18 +133,18 @@ function Highlights() {
         })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
-    }, [experienceId, experiences, token]);
+    }, [experienceId, experiences, token, profileId]);
 
     useEffect(() => {
         setLoading(true)
         setError(null)
-        if (!token)
+        if (!token || !profileId)
         {
           setLoading(false)
           return
         }
 
-        const experiencesPath = buildUrl(`profiles/${HARDCODED_PROFILE_ID}/experiences`)
+        const experiencesPath = buildUrl(`profiles/${profileId}/experiences`)
     
         fetch(experiencesPath, {
           headers: {
@@ -160,10 +164,10 @@ function Highlights() {
           })
           .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
           .finally(() => setLoading(false))
-    }, [token]);
+    }, [token, profileId]);
 
     useEffect(() => {
-        if (!token)
+        if (!token || !profileId)
         {
           setLoading(false)
           return
@@ -180,7 +184,7 @@ function Highlights() {
           schools.map(async (e) => {
             const res = await fetch(
               buildUrl(
-                `profiles/${HARDCODED_PROFILE_ID}/experiences/${e.id}/edu-details`,
+                `profiles/${profileId}/experiences/${e.id}/edu-details`,
               ), {
                 headers: {
                   "Content-Type": "application/json",
@@ -201,15 +205,15 @@ function Highlights() {
         return () => {
           cancelled = true
         }
-      }, [experiences, token])
+      }, [experiences, token, profileId]);
   
     async function handleCreateHighlight() {
       try {
         let newHighlight = null
         if (experienceKind === "work" || experienceKind === "side_project") {
-          newHighlight = await createHighlight(HARDCODED_PROFILE_ID.toString(), experienceId.toString(), newExperienceBody.trim(), newSortOrder, token)
+          newHighlight = await createHighlight(profileId, experienceId.toString(), newExperienceBody.trim(), newSortOrder, token)
         } else if (experienceKind === "school") {
-          newHighlight = await createCourse(HARDCODED_PROFILE_ID.toString(), experienceId.toString(), newCourseName.trim(), newCourseCode.trim(), newSortOrder, token)
+          newHighlight = await createCourse(profileId, experienceId.toString(), newCourseName.trim(), newCourseCode.trim(), newSortOrder, token)
         }
   
         setHighlights((prev) => [...prev, newHighlight])
@@ -225,11 +229,11 @@ function Highlights() {
     return (
       <>
       {
-        token ? (
+        profileId ? (
           <section id="highlights" className="m-4">
             <div id="center" className="m-4">
               <h2 className="font-bold">
-                Highlights List
+                Highlights List for {profileName}
               </h2>
               <div>
                 {loading ? "Loading..." : error ? "Error: " + error : "No error"}
@@ -308,7 +312,7 @@ function Highlights() {
           <section id="highlights-offline" className="m-4 flex flex-col gap-4">
             <div className="m-4">
               <h2 className="font-bold">Highlights</h2>
-              <p>You are offline. Please login to view your highlights.</p>
+              <p>Please login and select an experience to view your highlights.</p>
             </div>
           </section>
         )

@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
 import { buildUrl } from '../api'
-import { HARDCODED_PROFILE_ID } from '../config'
 import { Schemas } from '../types'
 import { useAuth } from '../auth/AuthContext'
 
+
+interface SkillsProps {
+  profileId: string | null
+  profileName: string | null
+}
 
 async function createSkill(profile_id: string, name: string, category: string, token: string) {
     const skillPath = buildUrl(`profiles/${profile_id}/skills`)
@@ -26,7 +30,7 @@ async function createSkill(profile_id: string, name: string, category: string, t
     return response.json()
 }
 
-function Skills() {
+function Skills({ profileId, profileName }: SkillsProps) {
     const [skills, setSkills] = useState([])
     const [newSkillName, setNewSkillName] = useState("")
     const [newSkillCategory, setNewSkillCategory] = useState("technical")
@@ -38,14 +42,14 @@ function Skills() {
     useEffect(() => {
       setLoading(true)
       setError(null)
-      
-      if (!token)
+
+      if (!token || !profileId)
       {
         setLoading(false)
         return
       }
 
-      const skillPath = buildUrl(`profiles/${HARDCODED_PROFILE_ID}/skills`)
+      const skillPath = buildUrl(`profiles/${profileId}/skills`)
 
       fetch(skillPath, {
         headers: {
@@ -65,11 +69,11 @@ function Skills() {
         })
         .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
         .finally(() => setLoading(false))
-    }, [token]);
+    }, [token, profileId]);
   
     async function handleCreateSkill() {
       try {
-        const created = await createSkill(HARDCODED_PROFILE_ID.toString(), newSkillName.trim(), newSkillCategory, token)
+        const created = await createSkill(profileId, newSkillName.trim(), newSkillCategory, token)
         setSkills((current) => current.concat(created))
         setNewSkillName('')
         setNewSkillCategory('technical')
@@ -81,11 +85,11 @@ function Skills() {
     return (
       <>
         {
-          token ? (
+          profileId ? (
             <section id="skills" className="m-4 flex flex-col gap-4">
               <div className="m-4">
                 <h2 className="font-bold">
-                  Skills List for Profile {HARDCODED_PROFILE_ID}
+                  Skills List for {profileName}
                 </h2>
                 <p>
                   {loading ? "Loading..." : error ? "Error: " + error : "No error"}
@@ -142,7 +146,7 @@ function Skills() {
             <section id="skills-offline" className="m-4 flex flex-col gap-4">
               <div className="m-4">
                 <h2 className="font-bold">Skills</h2>
-                <p>You are offline. Please login to view your skills.</p>
+                <p>Please login select a profile to view your skills.</p>
               </div>
             </section>
           )
