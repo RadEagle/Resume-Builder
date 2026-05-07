@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { buildUrl } from '../api'
+import { fetchApi } from '../api'
 import { Schemas, type ExperienceCreate } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 
@@ -10,18 +10,15 @@ interface ExperiencesProps {
 }
 
 async function createExperience(profile_id: string, experiencePayload: ExperienceCreate, token: string) {
-    const response = await fetch(buildUrl(`profiles/${profile_id}/experiences`), {
+    const data = await fetchApi(`profiles/${profile_id}/experiences`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(experiencePayload)
+      body: JSON.stringify(experiencePayload),
+      token: token
     })
-    if (!response.ok) {
-      throw new Error("Failed to create experience")
-    }
-    return response.json()
+    return data
 }
   
 async function createEducationDetail(profile_id: string, experience_id: string, degree: string, major: string, gpa: string, token: string) {
@@ -31,18 +28,15 @@ async function createEducationDetail(profile_id: string, experience_id: string, 
         gpa: gpa.trim() === "" ? undefined : Number(gpa.trim())
     })
 
-    const response = await fetch(buildUrl(`profiles/${profile_id}/experiences/${experience_id}/edu-details`), {
+    const data = await fetchApi(`profiles/${profile_id}/experiences/${experience_id}/edu-details`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify(educationDetailPayload)
+      body: JSON.stringify(educationDetailPayload),
+      token: token
     })
-    if (!response.ok) {
-      throw new Error("Failed to create education detail")
-    }
-    return response.json()
+    return data
 }
 
 function Experiences({ profileId, profileName }: ExperiencesProps) {
@@ -71,25 +65,19 @@ function Experiences({ profileId, profileName }: ExperiencesProps) {
         return
       }
 
-      const experiencesPath = buildUrl(`profiles/${profileId}/experiences`)
+      const experiencesPath = `profiles/${profileId}/experiences`
   
-      fetch(experiencesPath, {
+      fetchApi(experiencesPath, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
         },
+        token: token
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch experiences")
-          }
-          return response.json()
-        })
         .then(data => {
           const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
           setExperiences(parsed.success ? parsed.data : [])
         })
-        .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
+        .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
         .finally(() => setLoading(false))
     }, [token, profileId]);
   

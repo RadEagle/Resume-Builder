@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { buildUrl } from '../api'
+import { fetchApi } from '../api'
 import { Schemas } from '../types'
 import { useAuth } from '../auth/AuthContext'
 
@@ -10,24 +10,21 @@ interface SkillsProps {
 }
 
 async function createSkill(profile_id: string, name: string, category: string, token: string) {
-    const skillPath = buildUrl(`profiles/${profile_id}/skills`)
+    const skillPath = `profiles/${profile_id}/skills`
     const skillPayload = Schemas.SkillCreateSchema.parse({
         name: name.trim(),
         category: category.trim()
     })
 
-    const response = await fetch(skillPath, {
+    const data = await fetchApi(skillPath, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify(skillPayload)
+      body: JSON.stringify(skillPayload),
+      token: token
     })
-    if (!response.ok) {
-      throw new Error("Failed to create skill")
-    }
-    return response.json()
+    return data
 }
 
 function Skills({ profileId, profileName }: SkillsProps) {
@@ -49,31 +46,26 @@ function Skills({ profileId, profileName }: SkillsProps) {
         return
       }
 
-      const skillPath = buildUrl(`profiles/${profileId}/skills`)
+      const skillPath = `profiles/${profileId}/skills`
 
-      fetch(skillPath, {
+      fetchApi(skillPath, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
         },
+        token: token
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to fetch skills`)
-          }
-          return response.json()
-        })
         .then(data => {
           const parsed = Schemas.SkillReadSchema.array().safeParse(data)
           setSkills(parsed.success ? parsed.data : [])
         })
-        .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
+        .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch skills"))
         .finally(() => setLoading(false))
     }, [token, profileId]);
   
     async function handleCreateSkill() {
       try {
         const created = await createSkill(profileId, newSkillName.trim(), newSkillCategory, token)
+
         setSkills((current) => current.concat(created))
         setNewSkillName('')
         setNewSkillCategory('technical')

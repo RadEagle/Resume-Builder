@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { buildUrl } from '../api'
+import { fetchApi } from '../api'
 import { Schemas } from '../types'
 import { useAuth } from '../auth/AuthContext'
 
@@ -14,18 +14,16 @@ async function createProfile(name: string, token: string) {
         name: name.trim()
     })
 
-    const response = await fetch(buildUrl("profiles"), {
+    const data = await fetchApi("profiles", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify(profilePayload)
+      body: JSON.stringify(profilePayload),
+      token: token
     })
-    if (!response.ok) {
-      throw new Error("Failed to create profile")
-    }
-    return response.json()
+
+    return data
 }
 
 function Profiles({ onProfileChange }: ProfileProps) {
@@ -53,23 +51,17 @@ function Profiles({ onProfileChange }: ProfileProps) {
         return
       }
 
-      fetch(buildUrl("profiles"), {
+      fetchApi("profiles", {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
         },
+        token: token
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch profiles")
-          }
-          return response.json()
-        })
         .then(data => {
           const parsed = Schemas.ProfileReadSchema.array().safeParse(data)
           setProfiles(parsed.success ? parsed.data : [])
         })
-        .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
+        .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch profiles"))
         .finally(() => setLoading(false))
     }, [token]);
   
@@ -90,6 +82,11 @@ function Profiles({ onProfileChange }: ProfileProps) {
 
     async function handleSelectProfile(profileId: string) {
       setProfileId(profileId)
+      if (!profileId) {
+        onProfileChange("", "")
+        return
+      }
+
       const profile = profiles.find(p => p.id.toString() === profileId)
       if (!profile) {
         setError("Profile not found")

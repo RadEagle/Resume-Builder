@@ -10,4 +10,19 @@ function buildUrl(path: string) {
     return new URL(path, base).toString();
 }
 
-export { buildUrl };
+
+// fetch API with token
+async function fetchApi(path: string, options?: RequestInit & { token?: string }) {
+    const url = buildUrl(path)
+    const headers = new Headers(options?.headers)
+    if (options?.token) {
+        headers.set('Authorization', `Bearer ${options.token}`)
+    }
+    const response = await fetch(url, { ...options, headers })
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    return response.json()
+}
+
+export { buildUrl, fetchApi };

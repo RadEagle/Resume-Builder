@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { buildUrl } from '../api'
+import { fetchApi } from '../api'
 import { Schemas, type BulletRead, type CourseRead, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 
@@ -15,18 +15,15 @@ async function createHighlight(profile_id: string, experience_id: string, body: 
         sort_order: sortOrder.trim() === "" ? undefined : Number(sortOrder.trim()),
       })
     
-    const response = await fetch(buildUrl(`profiles/${profile_id}/experiences/${experience_id}/bullets`), {
+    const data = await fetchApi(`profiles/${profile_id}/experiences/${experience_id}/bullets`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify(bulletPayload)
+      body: JSON.stringify(bulletPayload),
+      token: token
     })
-    if (!response.ok) {
-      throw new Error("Failed to create experience highlight")
-    }
-    return response.json()
+    return data
 }
   
 async function createCourse(profile_id: string, experience_id: string, name: string, code: string, sortOrder: string, token: string) {
@@ -36,18 +33,15 @@ async function createCourse(profile_id: string, experience_id: string, name: str
         sort_order: sortOrder.trim() === "" ? undefined : Number(sortOrder.trim()),
       })
 
-    const response = await fetch(buildUrl(`profiles/${profile_id}/experiences/${experience_id}/courses`), {
+    const data = await fetchApi(`profiles/${profile_id}/experiences/${experience_id}/courses`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
       },
-      body: JSON.stringify(coursePayload)
+      body: JSON.stringify(coursePayload),
+      token: token
     })
-    if (!response.ok) {
-      throw new Error("Failed to create course")
-    }
-    return response.json()
+    return data
 }
 
 function experienceOptionLabel(
@@ -97,9 +91,9 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
 
       let highlightsPath = null
       if (selectedExperienceKind === "work" || selectedExperienceKind === "side_project") {
-        highlightsPath = buildUrl(`profiles/${profileId}/experiences/${experienceId}/bullets`)
+        highlightsPath = `profiles/${profileId}/experiences/${experienceId}/bullets`
       } else if (selectedExperienceKind === "school") {
-        highlightsPath = buildUrl(`profiles/${profileId}/experiences/${experienceId}/courses`)
+        highlightsPath = `profiles/${profileId}/experiences/${experienceId}/courses`
       }
 
       setExperienceKind(selectedExperienceKind)
@@ -108,18 +102,12 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
         return
       }
   
-      fetch(highlightsPath, {
+      fetchApi(highlightsPath, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
         },
+        token: token
       })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Failed to fetch experiences")
-          }
-          return response.json()
-        })
         .then(data => {
             let parsed = null
             if (selectedExperienceKind === "school") {
@@ -131,7 +119,7 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
                 setHighlights(parsed.success ? parsed.data : [])
             }
         })
-        .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
+        .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch highlights"))
         .finally(() => setLoading(false))
     }, [experienceId, experiences, token, profileId]);
 
@@ -144,25 +132,19 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
           return
         }
 
-        const experiencesPath = buildUrl(`profiles/${profileId}/experiences`)
+        const experiencesPath = `profiles/${profileId}/experiences`
     
-        fetch(experiencesPath, {
+        fetchApi(experiencesPath, {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
           },
+          token: token
         })
-          .then(response => {
-            if (!response.ok) {
-              throw new Error("Failed to fetch experiences")
-            }
-            return response.json()
-          })
           .then(data => {
             const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
             setExperiences(parsed.success ? parsed.data : [])
           })
-          .catch(err => setError(err instanceof Error ? err.message : "An unknown error occurred"))
+          .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
           .finally(() => setLoading(false))
     }, [token, profileId]);
 
@@ -182,18 +164,16 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
         const schools = experiences.filter((e) => e.kind === 'school')
         void Promise.all(
           schools.map(async (e) => {
-            const res = await fetch(
-              buildUrl(
-                `profiles/${profileId}/experiences/${e.id}/edu-details`,
-              ), {
+            const data = await fetchApi(
+              `profiles/${profileId}/experiences/${e.id}/edu-details`,
+              {
                 headers: {
                   "Content-Type": "application/json",
-                  "Authorization": `Bearer ${token}`
                 },
+                token: token
               }
             )
-            if (!res.ok) return [e.id, ''] as const
-            const data = await res.json()
+
             const parsed = Schemas.EduDetailReadSchema.array().safeParse(data)
             const deg =
               parsed.success && parsed.data[0] ? parsed.data[0].degree : ''
