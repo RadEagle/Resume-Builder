@@ -7,6 +7,7 @@ import { useAuth } from '../auth/AuthContext.tsx'
 interface ExperiencesProps {
   profileId: string | null
   profileName: string | null
+  onExperienceChange: () => void
 }
 
 async function createExperience(profile_id: string, experiencePayload: ExperienceCreate, token: string) {
@@ -39,7 +40,7 @@ async function createEducationDetail(profile_id: string, experience_id: string, 
     return data
 }
 
-function Experiences({ profileId, profileName }: ExperiencesProps) {
+function Experiences({ profileId, profileName, onExperienceChange }: ExperiencesProps) {
     const [experiences, setExperiences] = useState([])
     const [newExperienceTitle, setNewExperienceTitle] = useState("")
     const [newExperienceOrganization, setNewExperienceOrganization] = useState("")
@@ -106,7 +107,8 @@ function Experiences({ profileId, profileName }: ExperiencesProps) {
         if (newExperienceKind === 'school') {
           await createEducationDetail(profileId, newExperience.id.toString(), newDegree.trim(), newMajor.trim(), newGPA.trim(), token)
         }
-  
+
+        onExperienceChange()
         setExperiences((prev) => [...prev, newExperience])
         setNewExperienceTitle('')
         setNewExperienceOrganization('')

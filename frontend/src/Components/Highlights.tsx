@@ -7,6 +7,7 @@ import { useAuth } from '../auth/AuthContext.tsx'
 interface HighlightsProps {
   profileId: string | null
   profileName: string | null
+  experienceVersion: number
 }
 
 async function createHighlight(profile_id: string, experience_id: string, body: string, sortOrder: string, token: string) {
@@ -58,7 +59,7 @@ function experienceOptionLabel(
     return (e.title ?? '').trim()
 }
 
-function Highlights({ profileId, profileName }: HighlightsProps) {
+function Highlights({ profileId, profileName, experienceVersion }: HighlightsProps) {
     const [highlights, setHighlights] = useState<(BulletRead | CourseRead)[]>([])
     const [experiences, setExperiences] = useState([])
     const [experienceId, setExperienceId] = useState("")
@@ -121,7 +122,7 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
         })
         .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch highlights"))
         .finally(() => setLoading(false))
-    }, [experienceId, experiences, token, profileId]);
+    }, [experienceId, token, profileId]);
 
     useEffect(() => {
         setLoading(true)
@@ -146,7 +147,7 @@ function Highlights({ profileId, profileName }: HighlightsProps) {
           })
           .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
           .finally(() => setLoading(false))
-    }, [token, profileId]);
+    }, [token, profileId, experienceVersion]);
 
     useEffect(() => {
         if (!token || !profileId)
