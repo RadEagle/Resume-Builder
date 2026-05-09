@@ -6,6 +6,7 @@ import { Experiences } from './Components/Experiences.tsx'
 import { Skills } from './Components/Skills.tsx'
 import { Highlights } from './Components/Highlights.tsx'
 import { Authorization } from './Components/Authorization.tsx'
+import { Welcome } from './Components/Welcome.tsx'
 import { useAuth } from './auth/AuthContext.tsx'
 
 
@@ -32,8 +33,8 @@ function App() {
       {
         token ? (
           <>
-            <section id="welcome" className="flex justify-center">
-              <h1>Welcome to the Resume Builder!!</h1>
+            <section id="welcome" className="flex flex-col items-center">
+              <Welcome />
             </section>
             <section id="main-content" className="flex gap-4 justify-center">
               <Profiles onProfileChange={handleProfileChange}/>
