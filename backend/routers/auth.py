@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from database import pool
 from schemas import UserRegister, UserLogin, UserRead, TokenResponse
 from psycopg.rows import dict_row
 import routers.utilities as utilities
 import security
+from redis_rate_limit import enforce_auth_rate_limit
 
 
 router = APIRouter(
@@ -12,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/register", response_model=TokenResponse)
+@router.post("/register", response_model=TokenResponse, dependencies=[Depends(enforce_auth_rate_limit)])
 async def register_user(body: UserRegister):
     await utilities.check_duplicate_email(body.email)
     password_hash = security.hash_password(body.password)
@@ -43,7 +44,7 @@ async def register_user(body: UserRegister):
     return response
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse, dependencies=[Depends(enforce_auth_rate_limit)])
 async def login_user(body: UserLogin):
     try:
         async with pool.connection() as conn:

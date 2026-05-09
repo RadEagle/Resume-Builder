@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from database import pool, DATABASE_URL
+from redis_rate_limit import init_redis, close_redis
 from routers.profiles import router as profiles_router
 from routers.experiences import router as experiences_router
 from routers.bullets import router as bullets_router
@@ -20,12 +21,14 @@ async def lifespan(app: FastAPI):
         raise RuntimeError("Missing Database URL")
     
     await pool.open()
+    await init_redis()
     print("Database connection pool opened")
     
     yield  # The app stays in this "yield" state while running
     
     # --- Shutdown Logic ---
     # Put code here to run AFTER the app stops (e.g., close DB)
+    await close_redis()
     await pool.close()
     print("Database connection pool closed")
 
