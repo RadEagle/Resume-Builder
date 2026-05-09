@@ -1,4 +1,4 @@
-# Inatallation and Setup
+# Installation and Setup
 1. Clone this repo
 2. Ensure you have `docker`, `docker-compose-plugin`, and `npm` installed
 3. In a terminal, go to the backend directory with `cd backend`
