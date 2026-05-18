@@ -15,7 +15,7 @@ CREATE TABLE resume_profile (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT fk_user
     FOREIGN KEY (user_id)
-    REFERENCES resume_profile(id)
+    REFERENCES users(id)
     ON DELETE CASCADE
 );
 
