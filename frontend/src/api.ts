@@ -7,6 +7,16 @@ function buildUrl(path: string) {
     if (base == undefined) {
         throw new Error('API URL is not defined');
     }
+
+    // handle relative paths
+    if (base.startsWith('/')) {
+        // Strip trailing slash from base, and leading slash from path
+        const cleanBase = base.replace(/\/+$/, '');
+        const cleanPath = path.replace(/^\/+/, '');
+        
+        return `${cleanBase}/${cleanPath}`;
+    }
+
     return new URL(path, base).toString();
 }
 
