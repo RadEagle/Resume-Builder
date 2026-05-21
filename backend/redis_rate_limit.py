@@ -4,7 +4,6 @@ from pathlib import Path
 import redis.asyncio as redis
 from redis.exceptions import RedisError
 from fastapi import HTTPException, Request
-from typing import Optional
 
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
@@ -12,7 +11,7 @@ REDIS_URL = os.getenv("REDIS_URL")
 AUTH_RATE_LIMIT_MAX = 3
 AUTH_RATE_WINDOW_SEC = 60
 
-_redis: Optional[redis.Redis] = None # Fix this
+_redis: redis.Redis | None = None
 
 
 async def init_redis():
