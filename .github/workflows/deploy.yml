@@ -39,6 +39,7 @@ jobs:
             --exclude '.git*' \
             --exclude 'venv/' \
             --exclude '__pycache__/' \
+            --exclude '.env' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.DEPLOY_PATH }}
 
           echo "Validating services and restarting..."
