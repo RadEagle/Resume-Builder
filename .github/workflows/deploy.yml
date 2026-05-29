@@ -13,12 +13,12 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      - name: Install SSH Key Automatically
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.EC2_SSH_KEY }}
+          known_hosts: "unnecessary-with-if-using-strict-checking-off" # We bypass this below
+          if_key_exists: replace
 
       - name: Pre-Deployment Connectivity & Permission Check
         run: |
@@ -39,6 +39,7 @@ jobs:
       - name: Deploy Code via Rsync
         run: |
           rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
             --exclude '.git*' \
             --exclude 'venv/' \
             --exclude '__pycache__/' \
@@ -46,7 +47,7 @@ jobs:
 
       - name: Validate and Restart Services
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
             source ${{ secrets.DEPLOY_PATH }}/venv/bin/activate || true
             pip install -r ${{ secrets.DEPLOY_PATH }}/requirements.txt --upgrade
             sudo nginx -t
