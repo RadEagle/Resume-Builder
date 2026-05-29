@@ -1,5 +1,6 @@
 // use this for Vite
-const base = import.meta.env.VITE_API_URL.replace(/\/$/, '') + '/';
+const rawUrl = import.meta.env.VITE_API_URL || '/api';
+const base = rawUrl.replace(/\/+$/, '') + '/';
 
 
 // build URLs
