@@ -1,0 +1,55 @@
+name: Deploy FastAPI Application
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Pre-Deployment Connectivity & Permission Check
+        run: |
+          echo "Testing connection to EC2..."
+          if ! ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH Connection Successful!'" ; then
+            echo "ERROR: Cannot connect to EC2. Check your SSH Key, User, or Host IP."
+            exit 1
+          fi
+
+          echo "Testing write permissions on destination folder..."
+          if ! ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "[ -w '${{ secrets.DEPLOY_PATH }}' ]" ; then
+            echo "ERROR: Destination path '${{ secrets.DEPLOY_PATH }}' does not exist or is not writable by ${{ secrets.EC2_USER }}."
+            echo "Please run: sudo mkdir -p ${{ secrets.DEPLOY_PATH }} && sudo chown -R ${{ secrets.EC2_USER }}:${{ secrets.EC2_USER }} ${{ secrets.DEPLOY_PATH }}"
+            exit 1
+          fi
+          echo "All pre-checks passed!"
+
+      - name: Deploy Code via Rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git*' \
+            --exclude 'venv/' \
+            --exclude '__pycache__/' \
+            ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.DEPLOY_PATH }}
+
+      - name: Validate and Restart Services
+        run: |
+          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+            source ${{ secrets.DEPLOY_PATH }}/venv/bin/activate || true
+            pip install -r ${{ secrets.DEPLOY_PATH }}/requirements.txt --upgrade
+            sudo nginx -t
+            sudo systemctl restart uvicorn
+            sudo systemctl reload nginx
+          "
