@@ -13,46 +13,36 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Install SSH Key Automatically
+      - name: Execute Remote Deployment Steps
         run: |
-          # Save the SSH private key to a temporary variable inside the runner
+          # 1. Save the SSH private key
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
 
-          # Define the strict bypass flags
-          SSH_OPTS="-i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-
-      - name: Pre-Deployment Connectivity & Permission Check
-        run: |
           echo "Testing connectivity..."
-          if ! ssh $SSH_OPTS ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH Connection Successful!'" ; then
+          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH Connection Successful!'" ; then
             echo "ERROR: Network reachable, but SSH key authentication failed."
             rm -f ec2_key.pem
             exit 1
           fi
 
           echo "Testing folder permission..."
-          if ! ssh $SSH_OPTS ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "[ -w '${{ secrets.DEPLOY_PATH }}' ]" ; then
+          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "[ -w '${{ secrets.DEPLOY_PATH }}' ]" ; then
             echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
             rm -f ec2_key.pem
             exit 1
           fi
-          echo "All pre-checks passed!"
 
-      - name: Deploy Code via Rsync
-        run: |
           echo "Deploying files via Rsync..."
           rsync -avz --delete \
-            -e "ssh $SSH_OPTS" \
+            -e "ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
             --exclude '.git*' \
             --exclude 'venv/' \
             --exclude '__pycache__/' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.DEPLOY_PATH }}
 
-      - name: Validate and Restart Services
-        run: |
           echo "Validating services and restarting..."
-          ssh $SSH_OPTS ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
+          ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
             source ${{ secrets.DEPLOY_PATH }}/venv/bin/activate || true
             pip install -r ${{ secrets.DEPLOY_PATH }}/requirements.txt --upgrade
             sudo nginx -t
@@ -60,5 +50,5 @@ jobs:
             sudo systemctl reload nginx
           "
 
-          # Clean up the key from the runner workspace
+          # Clean up
           rm -f ec2_key.pem
