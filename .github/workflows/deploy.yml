@@ -20,7 +20,7 @@ jobs:
       - run: |
           cd frontend
           npm install
-          npm run build  # This generates the 'dist' folder inside GitHub Actions
+          npx vite build  # This generates the 'dist' folder inside GitHub Actions
 
       - name: Execute Remote Deployment Steps
         run: |
