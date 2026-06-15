@@ -4,3 +4,9 @@
 //   "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/Scripts/python.exe",
 //   "python-envs.pythonProjects": []
 // }
+
+{
+    "typescript.tsdk": "frontend/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "typescript.tsserver.experimental.enableProjectDiagnostics": true
+  }

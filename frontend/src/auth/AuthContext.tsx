@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useState, type PropsWithChildren } from "react"
 import type { UserRead, UserLogin } from "../types"
 import { buildUrl } from "../api"
 import { Schemas } from "../types"
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthValue | undefined>(undefined)
 
 
 // Create Auth Provider
-const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }: PropsWithChildren) => {
     const [user, setUser] = useState<UserRead | null>(null)
     const [token, setToken] = useState<string | null>(null)
 
