@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
-import { Schemas, type ExperienceCreate } from '../types.ts'
+import { Schemas, type ExperienceCreate, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 
 
@@ -10,7 +10,7 @@ interface ExperiencesProps {
   onExperienceChange: () => void
 }
 
-async function createExperience(profile_id: string, experiencePayload: ExperienceCreate, token: string) {
+async function createExperience(profile_id: string, experiencePayload: ExperienceCreate, token: string): Promise<ExperienceRead> {
     const data = await fetchApi(`profiles/${profile_id}/experiences`, {
       method: "POST",
       headers: {
@@ -41,7 +41,7 @@ async function createEducationDetail(profile_id: string, experience_id: string, 
 }
 
 function Experiences({ profileId, profileName, onExperienceChange }: ExperiencesProps) {
-    const [experiences, setExperiences] = useState([])
+    const [experiences, setExperiences] = useState<ExperienceRead[]>([])
     const [newExperienceTitle, setNewExperienceTitle] = useState("")
     const [newExperienceOrganization, setNewExperienceOrganization] = useState("")
     const [newExperienceLocation, setNewExperienceLocation] = useState("")
@@ -52,7 +52,7 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
     const [newStartDate, setNewStartDate] = useState("")
     const [newEndDate, setNewEndDate] = useState("")
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [error, setError] = useState<string | null>(null)
 
     const { token } = useAuth()
   
@@ -60,7 +60,13 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
       setLoading(true)
       setError(null)
 
-      if (!token || !/^\d+$/.test(profileId))
+      if (!token || !profileId)
+      {
+        setLoading(false)
+        return
+      }
+
+      if (!/^\d+$/.test(profileId))
       {
         setLoading(false)
         return
@@ -88,6 +94,11 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
         return
       }
 
+      if (!profileId) {
+        setError("Please select a profile to view experiences")
+        return
+      }
+
       try {
         let safeExperienceTitle = newExperienceKind === "work" || newExperienceKind === "side_project" ? newExperienceTitle.trim() : undefined
         let safeExperienceOrganization = newExperienceKind === "work" || newExperienceKind === "school" ? newExperienceOrganization.trim() : undefined
@@ -100,7 +111,7 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
           kind: newExperienceKind,
           start_date: newStartDate,
           end_date: newEndDate === "" ? undefined : newEndDate
-      })
+        })
   
         const newExperience = await createExperience(profileId, experiencePayload, token)
   

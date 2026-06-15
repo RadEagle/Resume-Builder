@@ -61,16 +61,16 @@ function experienceOptionLabel(
 
 function Highlights({ profileId, profileName, experienceVersion }: HighlightsProps) {
     const [highlights, setHighlights] = useState<(BulletRead | CourseRead)[]>([])
-    const [experiences, setExperiences] = useState([])
+    const [experiences, setExperiences] = useState<ExperienceRead[]>([])
     const [experienceId, setExperienceId] = useState("")
-    const [experienceKind, setExperienceKind] = useState("")
+    const [experienceKind, setExperienceKind] = useState<string | undefined | null>("")
     const [schoolDegreeById, setSchoolDegreeById] = useState({})
     const [newExperienceBody, setNewExperienceBody] = useState("")
     const [newCourseName, setNewCourseName] = useState("")
     const [newCourseCode, setNewCourseCode] = useState("")
     const [newSortOrder, setNewSortOrder] = useState("")
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [error, setError] = useState<string | null>(null)
 
     const { token } = useAuth()
   
@@ -189,6 +189,11 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
       }, [experiences, token, profileId]);
   
     async function handleCreateHighlight() {
+      if (!token || !profileId)
+      {
+        return
+      }
+
       try {
         let newHighlight = null
         if (experienceKind === "work" || experienceKind === "side_project") {
@@ -218,16 +223,19 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
               </h2>
               <div>
                 {loading ? "Loading..." : error ? "Error: " + error : "No error"}
-                {experienceKind === "school" ? highlights.map((highlight: CourseRead) => (
-                  <div key={highlight.id}>
-                      <h2>{highlight.name}</h2>
-                      <p>{highlight.code}</p>
-                  </div>
-                )) : highlights.map((highlight: BulletRead) => (
-                  <div key={highlight.id}>
-                      <h2>{highlight.body}</h2>
-                  </div>
-                ))}
+                {experienceKind === "school" 
+                  ? (highlights as CourseRead[]).map((highlight) => (
+                    <div key={highlight.id}>
+                        <h2>{highlight.name}</h2>
+                        <p>{highlight.code}</p>
+                    </div>
+                  )) 
+                  : (highlights as BulletRead[]).map((highlight) => (
+                    <div key={highlight.id}>
+                        <h2>{highlight.body}</h2>
+                    </div>
+                  ))
+                }
               </div>
             </div>
       

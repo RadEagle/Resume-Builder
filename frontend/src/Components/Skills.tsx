@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
-import { Schemas } from '../types'
+import { Schemas, type SkillRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
 
 
@@ -28,11 +28,11 @@ async function createSkill(profile_id: string, name: string, category: string, t
 }
 
 function Skills({ profileId, profileName }: SkillsProps) {
-    const [skills, setSkills] = useState([])
+    const [skills, setSkills] = useState<SkillRead[]>([])
     const [newSkillName, setNewSkillName] = useState("")
     const [newSkillCategory, setNewSkillCategory] = useState("technical")
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [error, setError] = useState<string | null>(null)
 
     const { token } = useAuth()
   
@@ -63,6 +63,11 @@ function Skills({ profileId, profileName }: SkillsProps) {
     }, [token, profileId]);
   
     async function handleCreateSkill() {
+      if (!token || !profileId)
+      {
+        return
+      }
+
       try {
         const created = await createSkill(profileId, newSkillName.trim(), newSkillCategory, token)
 

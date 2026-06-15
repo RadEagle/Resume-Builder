@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
-import { Schemas } from '../types'
+import { Schemas, type ProfileRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
 
 
@@ -27,11 +27,11 @@ async function createProfile(name: string, token: string) {
 }
 
 function Profiles({ onProfileChange }: ProfileProps) {
-    const [profiles, setProfiles] = useState([])
+    const [profiles, setProfiles] = useState<ProfileRead[]>([])
     const [profileId, setProfileId] = useState("")
     const [newProfileName, setNewProfileName] = useState("")
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+    const [error, setError] = useState<string | null>(null)
 
     const { user, token } = useAuth()
 
