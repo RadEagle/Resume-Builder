@@ -1,0 +1,4 @@
+# production.yml
+---
+ansible_user: ec2-user
+cors_origins: "http://{{ hostvars[inventory_hostname].ansible_host }}"

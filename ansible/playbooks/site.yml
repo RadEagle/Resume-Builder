@@ -1,0 +1,14 @@
+- name: Provision Resume Vault server
+  hosts: "{{ target_group | default('production') }}"
+  become: true
+  roles:
+    - role: common
+    - role: nodejs
+    - role: python
+    - role: postgresql
+    - role: docker
+    - role: redis
+    - role: backend_env
+    - role: nginx
+    - role: uvicorn
+    - role: monit

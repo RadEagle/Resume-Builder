@@ -1,0 +1,33 @@
+---
+# --- Application ---
+app_name: resume_vault
+deploy_user: ec2-user
+
+# Paths (override in production.yml / staging.yml if they differ)
+deploy_path: /home/ec2-user/Resume-Builder
+deploy_path_backend: "{{ deploy_path }}/backend"
+
+# --- Database ---
+db_name: resume_vault
+db_admin_user: admin
+postgresql_version: "16"          # AL2023 default; adjust if needed
+
+# --- Runtime services ---
+uvicorn_host: 127.0.0.1
+uvicorn_port: 8000
+redis_url: redis://localhost:6379/0
+
+# --- Software versions ---
+nodejs_major_version: "24"
+python_version: "3.12"
+
+# --- Backend .env (non-secret defaults) ---
+jwt_algorithm: HS256
+access_token_expire_minutes: 60
+
+# --- Frontend build reference (CI writes frontend/.env) ---
+vite_api_url: /api
+
+# --- Nginx ---
+server_name: "_"
+nginx_frontend_root: "{{ deploy_path }}/frontend/dist"
