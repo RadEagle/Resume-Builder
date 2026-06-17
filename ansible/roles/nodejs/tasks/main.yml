@@ -1,0 +1,11 @@
+---
+- name: Install Node.js
+  ansible.builtin.package:
+    name: nodejs{{ nodejs_major_version }}
+    state: present
+
+- name: Verify Node.js major version
+  ansible.builtin.command: node --version
+  register: node_version
+  changed_when: false
+  failed_when: not node_version.stdout.startswith('v' + nodejs_major_version)
