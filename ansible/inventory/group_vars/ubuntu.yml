@@ -1,0 +1,4 @@
+---
+package_manager: apt    # or apt on ubuntu
+python_package: python3.12
+python_devel_package: python3.12-dev
