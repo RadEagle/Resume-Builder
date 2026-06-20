@@ -1,8 +1,23 @@
 ---
-- name: Install Node.js
+- name: Install Node.js (Amazon Linux)
   ansible.builtin.package:
-    name: nodejs{{ nodejs_major_version }}
+    name: "nodejs{{ nodejs_major_version }}"
     state: present
+  when: ansible_os_family == "RedHat"
+
+- name: Grab NodeSource (Ubuntu)
+  ansible.builtin.shell: |
+    set -euo pipefail
+    curl -fsSL https://deb.nodesource.com/setup_{{ nodejs_major_version }}.x | bash -
+  args:
+    creates: /etc/apt/sources.list.d/nodesource.list
+  when: ansible_os_family == "Debian"
+  
+- name: Install Node.js (Ubuntu)
+  ansible.builtin.package:
+    name: "nodejs"
+    state: present
+  when: ansible_os_family == "Debian"
 
 - name: Verify Node.js major version
   ansible.builtin.command: node --version
