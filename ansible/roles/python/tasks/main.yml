@@ -19,7 +19,7 @@
 
 - name: Create venv
   ansible.builtin.command:
-    cmd: python3 -m venv {{ deploy_path_backend }}/venv
+    cmd: "{{ python_package }} -m venv {{ deploy_path_backend }}/venv"
   args:
     creates: "{{ deploy_path_backend }}/venv/bin/python"
 
