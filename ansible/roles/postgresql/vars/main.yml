@@ -1,0 +1,32 @@
+---
+postgresql_auth_method: scram-sha-256
+
+postgresql_global_config_options:
+  - option: unix_socket_directories
+    value: '{{ postgresql_unix_socket_directories | join(",") }}'
+  - option: log_directory
+    value: 'log'
+  - option: password_encryption
+    value: '{{ postgresql_auth_method }}'
+
+postgresql_hba_entries:
+  - { type: local, database: all, user: postgres, auth_method: peer }
+  - { type: local, database: all, user: all, auth_method: peer }
+  - { type: host, database: all, user: all, address: '127.0.0.1/32', auth_method: scram-sha-256 }
+  - { type: host, database: all, user: all, address: '::1/128', auth_method: scram-sha-256 }
+
+postgresql_databases:
+  - name: "{{ db_name }}"
+    owner: "{{ db_admin_user }}"
+
+postgresql_users:
+  - name: "{{ db_admin_user }}"
+    password: "{{ db_admin_password }}"
+    encrypted: true
+    db: "{{ db_name }}"
+
+postgresql_app_privs:
+  - { type: database, privs: ALL }
+  - { type: schema,   objs: public, privs: ALL }
+  - { type: table,    objs: ALL_IN_SCHEMA, schema: public, privs: ALL }
+  - { type: sequence, objs: ALL_IN_SCHEMA, schema: public, privs: "USAGE,SELECT,UPDATE" }

@@ -1,10 +1,9 @@
 ---
 # --- Application ---
 app_name: resume_vault
-deploy_user: ec2-user
 
 # Paths (override in production.yml / staging.yml if they differ)
-deploy_path: /home/ec2-user/Resume-Builder
+deploy_path: "/home/{{ ansible_user }}/Resume-Builder"
 deploy_path_backend: "{{ deploy_path }}/backend"
 
 # --- Database ---

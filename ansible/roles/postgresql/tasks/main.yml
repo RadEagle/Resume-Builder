@@ -1,0 +1,55 @@
+---
+- name: Install PostgreSQL
+  ansible.builtin.include_role:
+    name: geerlingguy.postgresql
+  
+- name: Copy schema to EC2 instance
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../schema.sql"
+    dest: "{{ deploy_path }}/schema.sql"
+    owner: "{{ ansible_user }}"
+    group: root
+    mode: '0644'
+
+- name: Check if our tracking table exists
+  community.postgresql.postgresql_query:
+    login_db: "{{ db_name }}"
+    login_host: 127.0.0.1
+    login_user: "{{ db_admin_user }}"
+    login_password: "{{ db_admin_password }}"
+    query: "SELECT to_regclass('public.users');"
+  register: table_check
+  no_log: true
+
+- name: Populate postgresql database
+  ansible.builtin.shell: >-
+    PGPASSWORD='{{ db_admin_password }}' psql -h 127.0.0.1
+    -U {{ db_admin_user }} -d {{ db_name }}
+    -f {{ deploy_path }}/schema.sql
+  when: table_check.query_result[0].to_regclass is none
+  no_log: true
+
+- name: Grant database privileges to user
+  community.postgresql.postgresql_privs:
+    login_db: "{{ db_name }}"
+    login_host: 127.0.0.1
+    login_user: "{{ db_admin_user }}"
+    login_password: "{{ db_admin_password }}"
+    roles: "{{ db_admin_user }}"
+    type: "{{ item.type }}"
+    privs: "{{ item.privs }}"
+    objs: "{{ item.objs | default(omit) }}"
+    schema: "{{ item.schema | default(omit) }}"
+  loop: "{{ postgresql_app_privs }}"
+  no_log: true
+
+- name: Grant default privileges to user
+  community.postgresql.postgresql_query:
+    login_db: "{{ db_name }}"
+    login_host: 127.0.0.1
+    login_user: "{{ db_admin_user }}"
+    login_password: "{{ db_admin_password }}"
+    query: |
+      ALTER DEFAULT PRIVILEGES FOR ROLE {{ db_admin_user }} IN SCHEMA public GRANT ALL ON TABLES TO {{ db_admin_user }};
+      ALTER DEFAULT PRIVILEGES FOR ROLE {{ db_admin_user }} IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {{ db_admin_user }};
+  no_log: true
