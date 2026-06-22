@@ -5,6 +5,7 @@
     - role: common
     - role: nodejs
     - role: python
+      tags: python
     - role: postgresql
     - role: docker
     - role: redis

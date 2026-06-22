@@ -1,0 +1,4 @@
+---
+python_packages:
+  - "{{ python_package }}"
+  - "{{ python_devel_package }}"

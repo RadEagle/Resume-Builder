@@ -19,7 +19,7 @@ redis_url: redis://localhost:6379/0
 
 # --- Software versions ---
 nodejs_major_version: "24"
-python_version: "3.12"
+python_min_version: "3.12"
 
 # --- Backend .env (non-secret defaults) ---
 jwt_algorithm: HS256

@@ -1,0 +1,31 @@
+---
+- name: Install Python
+  ansible.builtin.package:
+    name: "{{ python_packages }}"
+    state: present
+
+- name: Install Python-venv (Ubuntu)
+  ansible.builtin.package:
+    name: "{{ python_venv_package }}"
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Create backend directory
+  ansible.builtin.file:
+    path: "{{ deploy_path_backend }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    mode: '0755'
+
+- name: Create venv
+  ansible.builtin.command:
+    cmd: python3 -m venv {{ deploy_path_backend }}/venv
+  args:
+    creates: "{{ deploy_path_backend }}/venv/bin/python"
+
+- name: Verify Python Version
+  ansible.builtin.command:
+    cmd: "{{ deploy_path_backend }}/venv/bin/python --version"
+  register: ansible_python_version
+  changed_when: false
+  failed_when: not ansible_python_version.stdout.split()[1] is version(python_min_version, '>=')

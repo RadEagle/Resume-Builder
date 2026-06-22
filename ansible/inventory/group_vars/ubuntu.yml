@@ -1,5 +1,6 @@
 ---
 package_manager: apt    # or apt on ubuntu
-python_package: python3.12
-python_devel_package: python3.12-dev
+python_package: python3
+python_devel_package: python3-dev
+python_venv_package: python3-venv
 ansible_user: ubuntu
