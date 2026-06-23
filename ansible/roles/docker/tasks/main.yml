@@ -1,0 +1,19 @@
+---
+- name: Install docker
+  ansible.builtin.include_role:
+    name: geerlingguy.docker
+
+- name: Install docker compose plugin (Amazon Linux)
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/download/v2.32.4/docker-compose-linux-{{ ansible_architecture }}"
+    dest: /usr/libexec/docker/cli-plugins/docker-compose
+    mode: "0755"
+  when: ansible_facts.distribution == "Amazon"
+
+- name: Verify docker
+  ansible.builtin.command: docker --version
+  changed_when: false
+
+- name: Verify docker compose plugin
+  ansible.builtin.command: docker compose version
+  changed_when: false
