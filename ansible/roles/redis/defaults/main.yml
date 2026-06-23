@@ -1,0 +1,3 @@
+---
+redis_compose_project_name: resume_vault
+redis_compose_file: docker-compose.yml

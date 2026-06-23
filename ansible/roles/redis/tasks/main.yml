@@ -1,0 +1,27 @@
+---
+- name: Copy docker-compose configuration to host
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../{{ redis_compose_file }}"
+    dest: "{{ deploy_path }}/{{ redis_compose_file }}"
+    owner: "{{ ansible_user }}"
+    group: root
+    mode: '0644'
+
+- name: Set up Redis image
+  community.docker.docker_compose_v2:
+    project_src: "{{ deploy_path }}"
+    project_name: "{{ redis_compose_project_name }}"
+    state: present
+    pull: missing
+
+- name: Verify Redis responds
+  ansible.builtin.command:
+    argv:
+      - docker
+      - exec
+      - "{{ redis_compose_project_name }}-redis-1"
+      - redis-cli
+      - ping
+  register: redis_ping
+  changed_when: false
+  failed_when: redis_ping.stdout | trim != "PONG"
