@@ -1,0 +1,2 @@
+---
+nginx_remove_default_vhost: true

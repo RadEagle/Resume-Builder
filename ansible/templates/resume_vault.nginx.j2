@@ -1,0 +1,37 @@
+server {
+    listen       80;
+    listen       [::]:80;
+    server_name  {{ server_name }};
+    # root         /usr/share/nginx/html;
+
+    # Load configuration files for the default server block.
+    include /etc/nginx/default.d/*.conf;
+
+    error_page 404 /404.html;
+    location = /404.html {
+    }
+
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+    }
+
+    # listen 443 ssl;
+    # server_name _;
+
+    # Route 1: Send API calls to your Python backend
+    location /api {
+        proxy_pass http://{{ uvicorn_host }}:{{ uvicorn_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Route 2: Send normal visitors to your Frontend
+    location / {
+        root {{ nginx_frontend_root }};
+        index index.html;
+
+        # Keeps React/Vite routing working
+        try_files $uri $uri/ /index.html;
+    }
+}
+

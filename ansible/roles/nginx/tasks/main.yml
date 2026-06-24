@@ -1,0 +1,17 @@
+---
+- name: Install nginx
+  ansible.builtin.include_role:
+    name: geerlingguy.nginx
+  
+- name: Copy nginx configuration to host
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/resume_vault.nginx.j2"
+    dest: "/etc/nginx/conf.d/resume-vault_nginx.conf"
+  register: config_result
+
+- name: Validate nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  when: config_result.changed
+  changed_when: config_result.changed
+  notify: Restart nginx service
