@@ -1,0 +1,15 @@
+---
+- name: Setup backend environment variables
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/backend.env.j2"
+    dest: "{{ deploy_path_backend }}/.env"
+    owner: "{{ ansible_user }}"
+    mode: "0600"
+  no_log: true
+
+- name: Verify backend .env exists
+  ansible.builtin.stat:
+    path: "{{ deploy_path_backend }}/.env"
+  register: backend_env_file
+  changed_when: false
+  failed_when: not backend_env_file.stat.exists
