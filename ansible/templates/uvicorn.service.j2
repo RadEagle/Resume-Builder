@@ -1,0 +1,13 @@
+[Unit]
+Description=Uvicorn Backend Application Server
+After=network.target
+
+[Service]
+User={{ ansible_user }}
+WorkingDirectory={{ deploy_path_backend }}
+EnvironmentFile={{ deploy_path_backend }}/.env
+ExecStart={{ deploy_path_backend }}/venv/bin/python -m uvicorn main:app --host {{ uvicorn_host }} --port {{ uvicorn_port }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

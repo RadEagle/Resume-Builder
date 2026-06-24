@@ -1,0 +1,30 @@
+---
+- name: Copy uvicorn configuration to host
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/uvicorn.service.j2"
+    dest: /etc/systemd/system/uvicorn.service
+  register: uvicorn_config_result
+
+- name: Reload uvicorn service on change
+  ansible.builtin.systemd_service:
+    name: uvicorn
+    daemon_reload: true
+    enabled: true
+  when: uvicorn_config_result.changed
+
+# Requires git repository, Redis, .env
+- name: Install required python modules
+  ansible.builtin.pip:
+    virtualenv: "{{ deploy_path_backend }}/venv"
+    requirements: "{{ deploy_path_backend }}/requirements.txt"
+  
+- name: Start uvicorn service
+  ansible.builtin.systemd_service:
+    name: uvicorn
+    state: "started"
+
+- name: Verify backend is healthy
+  ansible.builtin.uri:
+    url: http://{{ uvicorn_host }}:{{ uvicorn_port }}
+    method: GET
+    status_code: 200
