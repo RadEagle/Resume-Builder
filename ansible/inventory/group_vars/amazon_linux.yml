@@ -10,3 +10,6 @@ docker_add_repo: false
 docker_packages:
   - docker
 docker_install_compose_plugin: false
+
+# Monit variables
+monit_conf_path: /etc/monit.d/resume-vault.conf

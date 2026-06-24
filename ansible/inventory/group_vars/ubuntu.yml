@@ -4,3 +4,7 @@ python_package: python3
 python_devel_package: python3-dev
 python_venv_package: python3-venv
 ansible_user: ubuntu
+
+# monit variables
+# Monit variables
+monit_conf_path: /etc/monit/conf.d/resume-vault.conf

@@ -1,0 +1,58 @@
+---
+- name: Install SPAL (Amazon Linux)
+  ansible.builtin.dnf:
+    name: spal-release
+    state: present
+  when: ansible_distribution == "Amazon"
+
+- name: Install Monit
+  ansible.builtin.package:
+    name: monit
+    state: present
+    update_cache: true
+
+- name: Verify Monit version
+  ansible.builtin.command:
+    cmd: monit --version
+  changed_when: false
+
+- name: Ensure monit configuration directory exists
+  ansible.builtin.file:
+    path: "{{ monit_conf_path | dirname }}"
+    state: directory
+    mode: '0755'
+
+- name: Copy monit configuration to host
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/resume_vault.monit.j2"
+    dest: "{{ monit_conf_path }}"
+  register: monit_config_result
+
+- name: Validate monit configuration
+  ansible.builtin.command:
+    cmd: monit -t
+  when: monit_config_result.changed
+  changed_when: false
+
+- name: Reload monit service on change
+  ansible.builtin.systemd_service:
+    name: monit
+    state: reloaded
+  when: monit_config_result.changed
+
+- name: Ensure monit service is enabled
+  ansible.builtin.systemd_service:
+    name: monit
+    enabled: true
+  
+- name: Start monit service
+  ansible.builtin.systemd_service:
+    name: monit
+    state: "started"
+
+- name: Check monit status
+  ansible.builtin.command:
+    cmd: systemctl is-active monit
+  register: monit_active
+  changed_when: false
+  failed_when: monit_active.stdout != 'active'

@@ -1,0 +1,15 @@
+check host uvicorn with address {{ uvicorn_host }}
+    if failed port {{ uvicorn_port }} protocol http then alert
+
+check process nginx with pidfile /run/nginx.pid
+    start program = "/usr/bin/systemctl start nginx"
+    stop program = "/usr/bin/systemctl stop nginx"
+    if failed host 127.0.0.1 port 80 protocol http then restart
+    # if failed host 127.0.0.1 port 443 protocol https then restart
+    if 5 restarts within 5 cycles then timeout
+
+check host postgresql with address 127.0.0.1
+    if failed port 5432 type tcp then alert
+
+check host redis with address 127.0.0.1
+    if failed port 6379 type tcp for 2 cycles then alert
