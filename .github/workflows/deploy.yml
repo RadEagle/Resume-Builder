@@ -43,7 +43,7 @@ jobs:
 
       - name: Check host connectivity...
         run: |
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH Connection Successful!'" ; then
+          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "echo 'SSH Connection Successful!'" ; then
             echo "ERROR: Network reachable, but SSH key authentication failed."
             rm -f ec2_key.pem
             exit 1
@@ -51,7 +51,7 @@ jobs:
 
       - name: Check folder permissions...
         run: |
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.DEPLOY_HOST }} "[ -w '${{ secrets.DEPLOY_PATH }}' ]" ; then
+          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "[ -w '${{ secrets.DEPLOY_PATH }}' ]" ; then
             echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
             rm -f ec2_key.pem
             exit 1
@@ -66,11 +66,11 @@ jobs:
             --exclude '__pycache__/' \
             --exclude '.env' \
             --exclude 'node_modules/' \
-            ./ ${{ secrets.EC2_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}
+            ./ ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}
       
       - name: Grant frontend permissions to user
         run: |
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.DEPLOY_HOST }} "chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist" ; then
+          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist" ; then
             echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
             rm -f ec2_key.pem
             exit 1
@@ -98,8 +98,8 @@ jobs:
 
           ansible-playbook playbooks/site.yml   \
           -i inventory/hosts.yml   \
-          --limit 'amazon_linux:&$ANSIBLE_GROUP'   \
-          -e "target_group=$ANSIBLE_GROUP"   \
+          --limit 'amazon_linux:&${{ env.ANSIBLE_GROUP }}'   \
+          -e "target_group=${{ env.ANSIBLE_GROUP }}"   \
           -u ${{ secrets.EC2_USER }}   \
           --private-key $GITHUB_WORKSPACE/ec2_key.pem \
           --vault-password-file $GITHUB_WORKSPACE/temp_ansible_pass.txt
