@@ -71,6 +71,7 @@ jobs:
         run: |
           export ANSIBLE_ROLES_PATH=$(pwd)/roles
           export EC2_HOST="${{ secrets.EC2_HOST }}"
+          export ANSIBLE_HOST_KEY_CHECKING=False
           ansible-playbook playbooks/site.yml   \
           -i inventory/hosts.yml   \
           --limit 'amazon_linux:&production'   \
@@ -80,6 +81,7 @@ jobs:
           --vault-password-file $GITHUB_WORKSPACE/temp_ansible_pass.txt
 
       - name: Clean up secrets
+        if: always()
         run: |
           rm -f $GITHUB_WORKSPACE/ec2_key.pem
           rm -f $GITHUB_WORKSPACE/temp_ansible_pass.txt
