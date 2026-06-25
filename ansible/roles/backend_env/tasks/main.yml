@@ -6,6 +6,7 @@
     owner: "{{ ansible_user }}"
     mode: "0600"
   no_log: true
+  notify: Restart uvicorn service
 
 - name: Verify backend .env exists
   ansible.builtin.stat:

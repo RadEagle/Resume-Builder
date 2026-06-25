@@ -24,7 +24,7 @@ jobs:
 
       - name: Execute Remote Deployment Steps
         run: |
-          # 1. Save the SSH private key
+          # Save the SSH private key
           echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
           chmod 600 ec2_key.pem
 
@@ -52,6 +52,26 @@ jobs:
             --exclude 'node_modules/' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.DEPLOY_PATH }}
 
+          # Save the ansible password
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > temp_ansible_pass.txt
+          chmod 600 temp_ansible_pass.txt
+
+          echo "Install Ansible"
+          pip install ansible
+          cd ansible
+          ansible-galaxy install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml
+
+          echo "Running Ansible Playbook"
+          export ANSIBLE_ROLES_PATH=$(pwd)/roles
+          ansible-playbook playbooks/site.yml   \
+          -i inventory/hosts.yml   \
+          --limit 'amazon_linux:&production'   \
+          -e "target_group=production"   \
+          -u ec2-user   \
+          --private-key ~/ec2_key.pem \
+          --vault-password-file ~/temp_ansible_pass.txt
+
           echo "Validating services and restarting..."
           ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "
             source ${{ secrets.DEPLOY_PATH_BACKEND }}/venv/bin/activate || true
@@ -62,4 +82,8 @@ jobs:
           "
 
           # Clean up
+          cd ~
           rm -f ec2_key.pem
+          rm -f temp_ansible_pass.txt
+
+          

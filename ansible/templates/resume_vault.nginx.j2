@@ -15,8 +15,11 @@ server {
     location = /50x.html {
     }
 
-    # listen 443 ssl;
-    # server_name _;
+    listen 443 ssl;
+    server_name {{ domain_name }};
+
+    ssl_certificate /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ domain_name }}/privkey.pem;
 
     # Route 1: Send API calls to your Python backend
     location /api {

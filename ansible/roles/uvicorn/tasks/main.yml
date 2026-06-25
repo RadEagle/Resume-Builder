@@ -4,6 +4,7 @@
     src: "{{ playbook_dir }}/../templates/uvicorn.service.j2"
     dest: /etc/systemd/system/uvicorn.service
   register: uvicorn_config_result
+  notify: Restart uvicorn service
 
 - name: Reload uvicorn service on change
   ansible.builtin.systemd_service:
@@ -12,16 +13,23 @@
     enabled: true
   when: uvicorn_config_result.changed
 
+- name: Flush uvicorn handlers after reload
+  ansible.builtin.meta: flush_handlers
+
 # Requires git repository, Redis, .env
 - name: Install required python modules
   ansible.builtin.pip:
     virtualenv: "{{ deploy_path_backend }}/venv"
     requirements: "{{ deploy_path_backend }}/requirements.txt"
-  
+  notify: Restart uvicorn service
+
 - name: Start uvicorn service
   ansible.builtin.systemd_service:
     name: uvicorn
     state: "started"
+
+- name: Flush uvicorn handlers after pip
+  ansible.builtin.meta: flush_handlers
 
 - name: Verify backend is healthy
   ansible.builtin.uri:
