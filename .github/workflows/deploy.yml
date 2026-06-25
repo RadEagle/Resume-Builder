@@ -70,6 +70,12 @@ jobs:
       
       - name: Grant frontend permissions to user
         run: |
+          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "chmod 755 /home/${{ secrets.EC2_USER }}" ; then
+            echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
+            rm -f ec2_key.pem
+            exit 1
+          fi
+
           if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist" ; then
             echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
             rm -f ec2_key.pem
