@@ -1,3 +1,7 @@
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,9 +39,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # 2. Define the CORS middleware
-origins = [
-    "http://localhost:5173"
-]
+load_dotenv(Path(__file__).resolve().parent / ".env")
+origins = os.getenv("CORS_ORIGINS").split(",")
 
 app.add_middleware(
     CORSMiddleware,
@@ -81,4 +84,4 @@ async def health_db():
 
 # 5. Run the code
 # source .venv/Scripts/activate
-# uvicorn main:app --reload --port 8000
+# python -m uvicorn main:app --reload --port 8000
