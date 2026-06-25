@@ -54,19 +54,20 @@ jobs:
             --exclude 'node_modules/' \
             ./ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.DEPLOY_PATH }}
 
-      - name: Save the SSH private key
+      - name: Save Ansible vault password
         run: |
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > temp_ansible_pass.txt
           chmod 600 temp_ansible_pass.txt
 
       - name: Install Ansible
+        working-directory: ansible
         run: |
           pip install ansible
-          cd ansible
           ansible-galaxy install -r requirements.yml
           ansible-galaxy collection install -r requirements.yml
 
       - name: Run Ansible Playbook
+        working-directory: ansible
         run: |
           export ANSIBLE_ROLES_PATH=$(pwd)/roles
           export EC2_HOST="${{ secrets.EC2_HOST }}"
@@ -80,7 +81,6 @@ jobs:
 
       - name: Clean up secrets
         run: |
-          cd ~
           rm -f $GITHUB_WORKSPACE/ec2_key.pem
           rm -f $GITHUB_WORKSPACE/temp_ansible_pass.txt
 
