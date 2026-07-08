@@ -14,4 +14,10 @@ module "vpc" {
 
   public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
+
+  public_subnet_tags_per_az  = var.public_subnet_tags_per_az
+  private_subnet_tags_per_az = var.private_subnet_tags_per_az
+
+  public_subnet_names  = ["public-production", "public-staging", "public-spare"]
+  private_subnet_names = ["private-production", "private-staging", "private-spare"]
 }
