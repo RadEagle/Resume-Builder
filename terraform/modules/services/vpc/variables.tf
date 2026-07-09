@@ -1,3 +1,9 @@
+variable "vpc_name" {
+  type        = string
+  description = "The name of the VPC"
+  default     = "resume-tailor-vpc"
+}
+
 variable "vpc_cidr" {
   type        = string
   description = "The IP range to use for the VPC"

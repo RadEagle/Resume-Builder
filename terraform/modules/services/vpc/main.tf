@@ -2,7 +2,7 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "6.6.1"
 
-  name = "resume-tailor-vpc"
+  name = var.vpc_name
   cidr = var.vpc_cidr
 
   azs = var.azs
