@@ -22,4 +22,6 @@ module "vpc" {
     "us-east-1a" = { Environment = "production" }
     "us-east-1b" = { Environment = "staging" }
   }
+
+  enable_nat_gateway = false
 }

@@ -8,7 +8,7 @@ module "vpc" {
   azs = var.azs
 
   enable_dns_hostnames   = true
-  enable_nat_gateway     = true # set to false to disable NAT gateway
+  enable_nat_gateway     = var.enable_nat_gateway
   single_nat_gateway     = true
   one_nat_gateway_per_az = false
 

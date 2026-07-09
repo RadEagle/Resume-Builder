@@ -30,3 +30,9 @@ variable "private_subnet_tags_per_az" {
   description = "tags to add to the private subnets"
   default     = {}
 }
+
+variable "enable_nat_gateway" {
+  type        = bool
+  description = "set false to destroy NAT gateway and stop hourly charges"
+  default     = false
+}
