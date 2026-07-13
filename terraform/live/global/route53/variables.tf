@@ -9,3 +9,15 @@ variable "staging_subdomain" {
   type        = string
   default     = "staging"
 }
+
+variable "preview_subdomain" {
+  description = "The subdomain name of the incoming prod EC2 instance"
+  type        = string
+  default     = "preview"
+}
+
+variable "legacy_prod_ip" {
+  description = "The existing elastic IP for the old server"
+  type        = string
+  sensitive   = true
+}

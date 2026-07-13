@@ -9,6 +9,6 @@ output "apex_fqdn" {
 }
 
 output "name_servers" {
-  value       = aws_route53_zone.primary.name_servers
+  value       = data.aws_route53_zone.primary.name_servers
   description = "The list of records that direct computers where to find the servers"
 }
