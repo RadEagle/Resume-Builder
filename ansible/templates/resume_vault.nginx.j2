@@ -17,10 +17,10 @@ server {
 
     {% if enable_https | bool %}
         listen 443 ssl;
-        server_name preview.{{ domain_name }};
+        server_name {{ nginx_server_names }};
 
-        ssl_certificate /etc/letsencrypt/live/preview.{{ domain_name }}/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/preview.{{ domain_name }}/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/{{ certbot_cert_name }}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/{{ certbot_cert_name }}/privkey.pem;
     {% endif %}
 
     # Route 1: Send API calls to your Python backend

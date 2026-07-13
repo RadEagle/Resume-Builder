@@ -5,7 +5,7 @@
 
 - name: See if the SSL full chain file exists
   ansible.builtin.stat:
-    path: "/etc/letsencrypt/live/preview.{{ domain_name }}/fullchain.pem"
+    path: "/etc/letsencrypt/live/{{ certbot_cert_name }}/fullchain.pem"
   register: le_cert
   
 - name: Copy nginx configuration to host
