@@ -15,11 +15,13 @@ server {
     location = /50x.html {
     }
 
-    listen 443 ssl;
-    server_name {{ domain_name }};
+    {% if enable_https | bool %}
+        listen 443 ssl;
+        server_name preview.{{ domain_name }};
 
-    ssl_certificate /etc/letsencrypt/live/{{ domain_name }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ domain_name }}/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/preview.{{ domain_name }}/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/preview.{{ domain_name }}/privkey.pem;
+    {% endif %}
 
     # Route 1: Send API calls to your Python backend
     location /api {

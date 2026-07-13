@@ -2,11 +2,18 @@
 - name: Install nginx
   ansible.builtin.include_role:
     name: geerlingguy.nginx
+
+- name: See if the SSL full chain file exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/preview.{{ domain_name }}/fullchain.pem"
+  register: le_cert
   
 - name: Copy nginx configuration to host
   ansible.builtin.template:
     src: "{{ playbook_dir }}/../templates/{{ nginx_config_file }}"
     dest: "/etc/nginx/conf.d/resume-vault_nginx.conf"
+  vars:
+    enable_https: "{{ le_cert.stat.exists }}"
   register: nginx_config_result
 
 - name: Validate nginx configuration
@@ -15,3 +22,6 @@
   when: nginx_config_result.changed
   changed_when: nginx_config_result.changed
   notify: Restart nginx service
+
+- name: Flush any nginx handlers immediately
+  ansible.builtin.meta: flush_handlers
