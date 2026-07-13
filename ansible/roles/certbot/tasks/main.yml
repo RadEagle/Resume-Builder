@@ -4,6 +4,14 @@
     name: "{{ certbot_packages }}"
     state: present
 
+- name: Install Certbot deploy hook to reload nginx
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      nginx -t && systemctl reload nginx
+
 - name: CLEANUP - Pause certbot renew timer during issue
   ansible.builtin.systemd:
     name: certbot-renew.timer
