@@ -1,7 +1,6 @@
 # production.yml
 ---
 cors_origins: "http://{{ hostvars[inventory_hostname].ansible_host }},https://{{ domain_name }}"
-nginx_config_file: "resume_vault.nginx.j2"
 certbot_domains:
   - "preview.{{ domain_name }}"
 certbot_cert_name: "preview.{{ domain_name }}"

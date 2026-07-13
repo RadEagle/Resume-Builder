@@ -6,22 +6,44 @@
 - name: See if the SSL full chain file exists
   ansible.builtin.stat:
     path: "/etc/letsencrypt/live/{{ certbot_cert_name }}/fullchain.pem"
+  when: "'production' in group_names"
   register: le_cert
+
+- name: Set enable_https from cert presence
+  ansible.builtin.set_fact:
+    enable_https: "{{ le_cert.stat.exists | default(false) }}"
   
 - name: Copy nginx configuration to host
   ansible.builtin.template:
-    src: "{{ playbook_dir }}/../templates/{{ nginx_config_file }}"
-    dest: "/etc/nginx/conf.d/resume-vault_nginx.conf"
-  vars:
-    enable_https: "{{ le_cert.stat.exists }}"
-  register: nginx_config_result
+    src: "{{ playbook_dir }}/../templates/resume_vault.http.nginx.j2"
+    dest: "/etc/nginx/conf.d/resume-vault-http.conf"
+  register: http_config_result
+  notify: Restart nginx service
+
+- name: Deploy HTTPS nginx config
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/../templates/resume_vault.https.nginx.j2"
+    dest: /etc/nginx/conf.d/resume-vault-https.conf
+  when: enable_https | bool
+  register: https_config_result
+  notify: Restart nginx service
+
+- name: Remove HTTPS nginx config when certs absent
+  ansible.builtin.file:
+    path: /etc/nginx/conf.d/resume-vault-https.conf
+    state: absent
+  when: not (enable_https | bool)
+  register: https_config_removed
+  notify: Restart nginx service
 
 - name: Validate nginx configuration
   ansible.builtin.command:
     cmd: nginx -t
-  when: nginx_config_result.changed
-  changed_when: nginx_config_result.changed
-  notify: Restart nginx service
+  when: > 
+    http_config_result is changed 
+    or https_config_result is changed 
+    or https_config_removed is changed
+  changed_when: false
 
 - name: Flush any nginx handlers immediately
   ansible.builtin.meta: flush_handlers

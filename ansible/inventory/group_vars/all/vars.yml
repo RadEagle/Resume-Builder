@@ -28,5 +28,4 @@ access_token_expire_minutes: 60
 vite_api_url: /api
 
 # --- Nginx ---
-server_name: "_"
 nginx_frontend_root: "{{ deploy_path }}/frontend/dist"

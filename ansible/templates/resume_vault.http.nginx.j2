@@ -1,8 +1,7 @@
 server {
     listen       80;
     listen       [::]:80;
-    server_name  {{ server_name }};
-    # root         /usr/share/nginx/html;
+    server_name  {{ nginx_server_names }};
 
     # Load configuration files for the default server block.
     include /etc/nginx/default.d/*.conf;
@@ -15,6 +14,11 @@ server {
     location = /50x.html {
     }
 
+    {% if enable_https | bool %}
+    location / {
+        return 301 https://$host$request_uri;
+    }
+    {% else %}
     # Route 1: Send API calls to your Python backend
     location /api {
         proxy_pass http://{{ uvicorn_host }}:{{ uvicorn_port }};
@@ -30,4 +34,5 @@ server {
         # Keeps React/Vite routing working
         try_files $uri $uri/ /index.html;
     }
+    {% endif %}
 }
