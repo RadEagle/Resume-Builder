@@ -10,8 +10,9 @@ env:
   VITE_API_URL: /api
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  deploy-production:
+    if: github.ref_name == 'main'
+    runs-on: [self-hosted, production]
 
     steps:
       - name: Checkout Code
@@ -24,63 +25,28 @@ jobs:
       - run: |
           cd frontend
           npm install
-          npm run build  # This generates the 'dist' folder inside GitHub Actions
+          npm run build
 
       - name: Set deployment target
         run: |
-          if [[ "${{ github.ref_name }}" == "main" ]]; then
-            echo "DEPLOY_HOST=${{ secrets.EC2_HOST }}" >> "$GITHUB_ENV"
-            echo "ANSIBLE_GROUP=production" >> "$GITHUB_ENV"
-            echo "EC2_HOST=${{ secrets.EC2_HOST }}" >> "$GITHUB_ENV"
-            echo "${{ secrets.EC2_SSH_KEY }}" > ec2_key.pem
-          else
-            echo "DEPLOY_HOST=${{ secrets.STAGING_EC2_HOST }}" >> "$GITHUB_ENV"
-            echo "ANSIBLE_GROUP=staging" >> "$GITHUB_ENV"
-            echo "STAGING_EC2_HOST=${{ secrets.STAGING_EC2_HOST }}" >> "$GITHUB_ENV"
-            echo "${{ secrets.STAGING_EC2_SSH_KEY }}" > ec2_key.pem
-          fi
-          chmod 600 ec2_key.pem
-
-      - name: Check host connectivity...
-        run: |
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "echo 'SSH Connection Successful!'" ; then
-            echo "ERROR: Network reachable, but SSH key authentication failed."
-            rm -f ec2_key.pem
-            exit 1
-          fi
-
-      - name: Check folder permissions...
-        run: |
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "[ -w '${{ secrets.DEPLOY_PATH }}' ]" ; then
-            echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
-            rm -f ec2_key.pem
-            exit 1
-          fi
+          echo "DEPLOY_HOST=${{ secrets.EC2_HOST }}" >> "$GITHUB_ENV"
+          echo "EC2_HOST=${{ secrets.EC2_HOST }}" >> "$GITHUB_ENV"
+          echo "ANSIBLE_GROUP=production" >> "$GITHUB_ENV"
 
       - name: Deploy files via rsync
         run: |
-          rsync -avz --delete \
-            -e "ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" \
+          rsync -av --delete \
             --exclude '.git*' \
             --exclude 'venv/' \
             --exclude '__pycache__/' \
             --exclude '.env' \
             --exclude 'node_modules/' \
-            ./ ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}
+            ./ ${{ secrets.DEPLOY_PATH }}
       
       - name: Grant frontend permissions to user
         run: |
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "chmod 755 /home/${{ secrets.EC2_USER }}" ; then
-            echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
-            rm -f ec2_key.pem
-            exit 1
-          fi
-
-          if ! ssh -i ec2_key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ env.DEPLOY_HOST }} "chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist" ; then
-            echo "ERROR: Target folder is not writable by ${{ secrets.EC2_USER }}."
-            rm -f ec2_key.pem
-            exit 1
-          fi
+          chmod 755 /home/${{ secrets.EC2_USER }}
+          chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist
 
       - name: Save Ansible vault password
         run: |
@@ -98,20 +64,86 @@ jobs:
         working-directory: ansible
         run: |
           export ANSIBLE_ROLES_PATH=$(pwd)/roles
-          export EC2_HOST="${{ env.EC2_HOST }}"
-          export STAGING_EC2_HOST="${{ env.STAGING_EC2_HOST }}"
           export ANSIBLE_HOST_KEY_CHECKING=False
+          export EC2_HOST="${{ env.EC2_HOST }}"
 
           ansible-playbook playbooks/site.yml   \
           -i inventory/hosts.yml   \
           --limit 'amazon_linux:&${{ env.ANSIBLE_GROUP }}'   \
           -e "target_group=${{ env.ANSIBLE_GROUP }}"   \
-          -u ${{ secrets.EC2_USER }}   \
-          --private-key $GITHUB_WORKSPACE/ec2_key.pem \
+          -c local \
           --vault-password-file $GITHUB_WORKSPACE/temp_ansible_pass.txt
 
       - name: Clean up secrets
         if: always()
         run: |
-          rm -f $GITHUB_WORKSPACE/ec2_key.pem
+          rm -f $GITHUB_WORKSPACE/temp_ansible_pass.txt
+
+  deploy-staging:
+    if: github.ref_name == 'staging'
+    runs-on: [self-hosted, staging]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js & Build Frontend
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - run: |
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Set deployment target
+        run: |
+          echo "STAGING_EC2_HOST=${{ secrets.STAGING_EC2_HOST }}" >> "$GITHUB_ENV"
+          echo "EC2_HOST=${{ secrets.STAGING_EC2_HOST }}" >> "$GITHUB_ENV"
+          echo "ANSIBLE_GROUP=staging" >> "$GITHUB_ENV"
+
+      - name: Deploy files via rsync
+        run: |
+          rsync -av --delete \
+            --exclude '.git*' \
+            --exclude 'venv/' \
+            --exclude '__pycache__/' \
+            --exclude '.env' \
+            --exclude 'node_modules/' \
+            ./ ${{ secrets.DEPLOY_PATH }}
+      
+      - name: Grant frontend permissions to user
+        run: |
+          chmod 755 /home/${{ secrets.EC2_USER }}
+          chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist
+
+      - name: Save Ansible vault password
+        run: |
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > temp_ansible_pass.txt
+          chmod 600 temp_ansible_pass.txt
+
+      - name: Install Ansible
+        working-directory: ansible
+        run: |
+          pip install ansible
+          ansible-galaxy install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Run Ansible Playbook
+        working-directory: ansible
+        run: |
+          export ANSIBLE_ROLES_PATH=$(pwd)/roles
+          export ANSIBLE_HOST_KEY_CHECKING=False
+          export STAGING_EC2_HOST="${{ env.STAGING_EC2_HOST }}"
+
+          ansible-playbook playbooks/site.yml   \
+          -i inventory/hosts.yml   \
+          --limit 'amazon_linux:&${{ env.ANSIBLE_GROUP }}'   \
+          -e "target_group=${{ env.ANSIBLE_GROUP }}"   \
+          -c local \
+          --vault-password-file $GITHUB_WORKSPACE/temp_ansible_pass.txt
+
+      - name: Clean up secrets
+        if: always()
+        run: |
           rm -f $GITHUB_WORKSPACE/temp_ansible_pass.txt
