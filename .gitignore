@@ -9,3 +9,4 @@ ansible/collections/
 terraform/**/.terraform
 terraform/**/*.tfstate*
 terraform/**/aws*
+.cursor

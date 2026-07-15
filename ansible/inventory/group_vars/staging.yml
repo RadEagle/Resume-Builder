@@ -1,4 +1,4 @@
 # staging.yml
 ---
-cors_origins: "http://{{ hostvars[inventory_hostname].ansible_host }}"
-nginx_server_names: "_"
+cors_origins: "http://{{ ansible_host }},http://staging.{{ domain_name }}"
+nginx_server_names: "staging.{{ domain_name }}"
