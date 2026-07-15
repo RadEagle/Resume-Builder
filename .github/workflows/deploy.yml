@@ -56,7 +56,8 @@ jobs:
       - name: Install Ansible
         working-directory: ansible
         run: |
-          python3 -m pip install ansible
+          sudo dnf install -y python3-pip
+          python3 -m pip install --user ansible
           ansible-galaxy install -r requirements.yml
           ansible-galaxy collection install -r requirements.yml
 
@@ -125,7 +126,8 @@ jobs:
       - name: Install Ansible
         working-directory: ansible
         run: |
-          python3 -m pip install ansible
+          sudo dnf install -y python3-pip
+          python3 -m pip install --user ansible
           ansible-galaxy install -r requirements.yml
           ansible-galaxy collection install -r requirements.yml
 
