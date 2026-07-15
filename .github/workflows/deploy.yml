@@ -133,7 +133,7 @@ jobs:
           python3 -m pip install --user ansible
 
           ansible-galaxy install -r requirements.yml -p roles --timeout 120
-          ansible-galaxy collection install -r requirements.yml --timeout 120
+          ansible-galaxy collection install -r requirements.yml --force --timeout 120
 
       - name: Run Ansible Playbook
         working-directory: ansible
