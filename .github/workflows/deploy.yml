@@ -58,8 +58,10 @@ jobs:
         run: |
           sudo dnf install -y python3-pip
           python3 -m pip install --user ansible
-          ansible-galaxy install -r requirements.yml
-          ansible-galaxy collection install -r requirements.yml
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+          ansible-galaxy install -r requirements.yml -p roles
+          ansible-galaxy collection install -r requirements.yml -p collections
 
       - name: Run Ansible Playbook
         working-directory: ansible
@@ -128,8 +130,10 @@ jobs:
         run: |
           sudo dnf install -y python3-pip
           python3 -m pip install --user ansible
-          ansible-galaxy install -r requirements.yml
-          ansible-galaxy collection install -r requirements.yml
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+          ansible-galaxy install -r requirements.yml -p roles
+          ansible-galaxy collection install -r requirements.yml -p collections
 
       - name: Run Ansible Playbook
         working-directory: ansible
