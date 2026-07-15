@@ -56,20 +56,21 @@ jobs:
       - name: Install Ansible
         working-directory: ansible
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           sudo dnf install -y python3-pip
           python3 -m pip install --user ansible
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-          ansible-galaxy install -r requirements.yml -p roles
-          ansible-galaxy collection install -r requirements.yml -p collections
+          ansible-galaxy install -r requirements.yml -p roles --timeout 120
+          ansible-galaxy collection install -r requirements.yml --force --timeout 120
 
       - name: Run Ansible Playbook
         working-directory: ansible
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           export ANSIBLE_ROLES_PATH=$(pwd)/roles
           export ANSIBLE_HOST_KEY_CHECKING=False
           export EC2_HOST="${{ env.EC2_HOST }}"
-
+          
           ansible-playbook playbooks/site.yml   \
           -i inventory/hosts.yml   \
           --limit 'amazon_linux:&${{ env.ANSIBLE_GROUP }}'   \
