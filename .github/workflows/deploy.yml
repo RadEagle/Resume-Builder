@@ -113,12 +113,12 @@ jobs:
             --exclude '__pycache__/' \
             --exclude '.env' \
             --exclude 'node_modules/' \
-            $HOME/${{ secrets.DEPLOY_PATH }}
+            ./ ${{ secrets.DEPLOY_PATH }}
       
       - name: Grant frontend permissions to user
         run: |
-          chmod 755 $HOME
-          chmod 755 $HOME/${{ secrets.DEPLOY_PATH }}/frontend/dist
+          chmod 755 /home/${{ secrets.EC2_USER }}
+          chmod 755 ${{ secrets.DEPLOY_PATH }}/frontend/dist
 
       - name: Save Ansible vault password
         run: |
@@ -128,17 +128,19 @@ jobs:
       - name: Install Ansible
         working-directory: ansible
         run: |
+          export PATH="$HOME/.local/bin:$PATH"
           sudo dnf install -y python3-pip
           python3 -m pip install --user ansible
-          echo "$HOME/${{ secrets.DEPLOY_PATH }}/ansible" >> "$GITHUB_PATH"
 
           ansible-galaxy install -r requirements.yml -p roles
-          ansible-galaxy collection install -r requirements.yml -p collections
+          ansible-galaxy collection install -r requirements.yml
 
       - name: Run Ansible Playbook
         working-directory: ansible
         run: |
-          export ANSIBLE_ROLES_PATH=$HOME/${{ secrets.DEPLOY_PATH }}/ansible/roles
+          export PATH="$HOME/.local/bin:$PATH"
+          export ANSIBLE_ROLES_PATH=$(pwd)/roles
+          export ANSIBLE_COLLECTIONS_PATH="$(pwd)/collections"
           export ANSIBLE_HOST_KEY_CHECKING=False
           export STAGING_EC2_HOST="${{ env.STAGING_EC2_HOST }}"
 
