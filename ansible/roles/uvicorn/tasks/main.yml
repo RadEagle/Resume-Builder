@@ -13,9 +13,6 @@
     enabled: true
   when: uvicorn_config_result.changed
 
-- name: Flush uvicorn handlers after reload
-  ansible.builtin.meta: flush_handlers
-
 # Requires git repository, Redis, .env
 - name: Install required python modules
   ansible.builtin.pip:
@@ -36,3 +33,7 @@
     url: http://{{ uvicorn_host }}:{{ uvicorn_port }}
     method: GET
     status_code: 200
+  register: web_response
+  until: web_response.status == 200
+  retries: 10
+  delay: 3
