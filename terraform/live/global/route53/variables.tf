@@ -10,10 +10,16 @@ variable "staging_subdomain" {
   default     = "staging"
 }
 
-variable "preview_subdomain" {
-  description = "The subdomain name of the incoming prod EC2 instance"
+# variable "preview_subdomain" {
+#   description = "The subdomain name of the incoming prod EC2 instance"
+#   type        = string
+#   default     = "preview"
+# }
+
+variable "legacy_subdomain" {
+  description = "The subdomain name of the legacy EC2 instance"
   type        = string
-  default     = "preview"
+  default     = "legacy"
 }
 
 variable "legacy_prod_ip" {

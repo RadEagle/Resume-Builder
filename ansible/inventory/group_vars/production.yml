@@ -1,7 +1,7 @@
 # production.yml
 ---
-cors_origins: "http://{{ ansible_host }},https://preview.{{ domain_name }}"
+cors_origins: "http://{{ ansible_host }},https://{{ domain_name }}"
 certbot_domains:
-  - "preview.{{ domain_name }}"
-certbot_cert_name: "preview.{{ domain_name }}"
-nginx_server_names: "{{ ansible_host }} preview.{{ domain_name }}"
+  - "{{ domain_name }}"
+certbot_cert_name: "{{ domain_name }}"
+nginx_server_names: "{{ ansible_host }} {{ domain_name }}"
