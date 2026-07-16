@@ -1,0 +1,24 @@
+server {
+    listen       443 ssl;
+    listen       [::]:443 ssl;
+    server_name  {{ nginx_server_names }};
+
+    ssl_certificate /etc/letsencrypt/live/{{ certbot_cert_name }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ certbot_cert_name }}/privkey.pem;
+
+    # Route 1: Send API calls to your Python backend
+    location /api {
+        proxy_pass http://{{ uvicorn_host }}:{{ uvicorn_port }};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # Route 2: Send normal visitors to your Frontend
+    location / {
+        root {{ nginx_frontend_root }};
+        index index.html;
+
+        # Keeps React/Vite routing working
+        try_files $uri $uri/ /index.html;
+    }
+}

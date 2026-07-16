@@ -23,11 +23,21 @@
     - role: backend_env
       tags: backend_env
 
+    - role: uvicorn
+      tags: uvicorn
+
+    # HTTP nginx only
     - role: nginx
       tags: nginx
 
-    - role: uvicorn
-      tags: uvicorn
+    - role: certbot
+      tags: certbot
+      when: "'production' in group_names"
+
+    # HTTPS nginx
+    - role: nginx
+      tags: [nginx, certbot]
+      when: "'production' in group_names"
       
     - role: monit
       tags: monit

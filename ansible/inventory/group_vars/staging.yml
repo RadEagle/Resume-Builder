@@ -1,4 +1,4 @@
 # staging.yml
 ---
-cors_origins: "http://{{ hostvars[inventory_hostname].ansible_host }}"
-nginx_config_file: "resume_vault.staging.nginx.j2"
+cors_origins: "http://{{ ansible_host }},http://staging.{{ domain_name }}"
+nginx_server_names: "{{ ansible_host }} staging.{{ domain_name }}"

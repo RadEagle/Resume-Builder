@@ -1,0 +1,48 @@
+---
+- name: Install certbot
+  ansible.builtin.package:
+    name: "{{ certbot_packages }}"
+    state: present
+
+- name: Install Certbot deploy hook to reload nginx
+  ansible.builtin.copy:
+    dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+    mode: "0755"
+    content: |
+      #!/bin/sh
+      nginx -t && systemctl reload nginx
+
+- name: CLEANUP - Pause certbot renew timer during issue
+  ansible.builtin.systemd:
+    name: certbot-renew.timer
+    state: stopped
+
+- name: CLEANUP - Stop any leftover certbot processes
+  ansible.builtin.shell: |
+    pkill -f '[c]ertbot' || true
+  changed_when: false
+  failed_when: false
+
+- name: CLEANUP - Remove stale certbot lock
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/lib/letsencrypt/.certbot.lock
+    - /var/log/letsencrypt/.certbot.lock
+  failed_when: false
+
+- name: Request certifications
+  ansible.builtin.command:
+    cmd: >-
+      certbot certonly --nginx --non-interactive --agree-tos
+      -m {{ certbot_email }}
+      -d {{ certbot_domains | join(' -d ') }}
+    creates: "/etc/letsencrypt/live/{{ certbot_cert_name }}/fullchain.pem"
+  no_log: true
+
+- name: Enable auto-renewal of SSL certificates
+  ansible.builtin.systemd:
+    name: certbot-renew.timer
+    enabled: true
+    state: started

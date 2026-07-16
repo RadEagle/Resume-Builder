@@ -6,3 +6,7 @@
 todo*.txt
 ansible/roles/geerlingguy.*/
 ansible/collections/
+terraform/**/.terraform
+terraform/**/*.tfstate*
+terraform/**/aws*
+.cursor
