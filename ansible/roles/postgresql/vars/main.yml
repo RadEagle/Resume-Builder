@@ -18,9 +18,6 @@ postgresql_hba_entries:
 postgresql_databases:
   - name: "{{ db_name }}"
     owner: "{{ db_admin_user }}"
-    lc_collate: "C.UTF-8"
-    lc_ctype: "C.UTF-8"
-    encoding: "UTF8"
 
 postgresql_users:
   - name: "{{ db_admin_user }}"
