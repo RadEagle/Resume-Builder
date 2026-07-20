@@ -13,6 +13,7 @@
 
     - role: postgresql
       tags: postgresql
+      when: "'production' not in group_names"
 
     - role: docker
       tags: docker

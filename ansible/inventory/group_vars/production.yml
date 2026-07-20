@@ -6,3 +6,6 @@ certbot_domains:
   - "www.{{ domain_name }}"
 certbot_cert_name: "{{ domain_name }}"
 nginx_server_names: "{{ domain_name }} www.{{ domain_name }}"
+
+db_name: "resume_vault_prod"
+db_host: "terraform-f6b5e348461be113ad9247c9d5.cg3gmeu6i1g7.us-east-1.rds.amazonaws.com"

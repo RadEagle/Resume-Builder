@@ -8,7 +8,7 @@ check process nginx with pidfile /run/nginx.pid
     # if failed host 127.0.0.1 port 443 protocol https then restart
     if 5 restarts within 5 cycles then timeout
 
-check host postgresql with address 127.0.0.1
+check host postgresql with address {{ db_host }}
     if failed port 5432 type tcp then alert
 
 check host redis with address 127.0.0.1
