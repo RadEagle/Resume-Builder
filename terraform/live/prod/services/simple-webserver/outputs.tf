@@ -12,3 +12,8 @@ output "instance_elastic_ip" {
   value       = module.simple-webserver.instance_elastic_ip
   description = "The Elastic IP address of the EC2 instance."
 }
+
+output "instance_security_group_id" {
+  value       = module.simple-webserver.instance_security_group_id
+  description = "The security group ID of the EC2 instance."
+}

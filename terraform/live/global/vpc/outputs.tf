@@ -13,7 +13,12 @@ output "production_public_subnet_id" {
   description = "The ID of the production public subnet"
 }
 
-output "vpc_default_security_group_id" {
-  value       = module.vpc.vpc_default_security_group_id
-  description = "The ID of the VPC default security group"
+output "production_private_subnet_id" {
+  value       = module.vpc.production_private_subnet_id
+  description = "The ID of the production private subnet"
+}
+
+output "spare_private_subnet_id" {
+  value       = module.vpc.spare_private_subnet_id
+  description = "The ID of the production spare subnet"
 }
