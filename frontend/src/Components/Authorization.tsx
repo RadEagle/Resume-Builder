@@ -81,7 +81,7 @@ function Authorization() {
               className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
             />
             <input 
-              type="text" 
+              type="password" 
               placeholder="Enter password..." 
               value={password}
               onChange={e => setPassword(e.target.value)}
