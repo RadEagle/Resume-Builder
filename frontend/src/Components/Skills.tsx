@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
 import { Schemas, type SkillRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
+import { InputField } from '../Library/InputField'
 
 
 interface SkillsProps {
@@ -120,12 +121,11 @@ function Skills({ profileId, profileName }: SkillsProps) {
         
               <div id="skill-creation" className="m-4 flex flex-col gap-2">
                 <h2>Create Skill</h2>
-                <input 
-                  type="text" 
+                <InputField 
+                  label=""
                   placeholder="Enter skill name..." 
                   value={newSkillName}
-                  onChange={e => setNewSkillName(e.target.value)}
-                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                  onChange={setNewSkillName}
                 />
                 <select
                   value={newSkillCategory}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
 import { Schemas, type ProfileRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
+import { InputField } from '../Library/InputField'
 
 
 interface ProfileProps {
@@ -134,12 +135,11 @@ function Profiles({ onProfileChange }: ProfileProps) {
         
               <div id="profile-creation" className="m-4 flex flex-col gap-2">
                 <h2>Create Profile</h2>
-                <input 
-                  type="text" 
+                <InputField 
+                  label=""
                   placeholder="Enter profile name..." 
                   value={newProfileName}
-                  onChange={e => setNewProfileName(e.target.value)}
-                  className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                  onChange={setNewProfileName}
                 />
                 <button onClick={() => void handleCreateProfile()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
               </div>
