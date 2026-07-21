@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
 import { Schemas, type BulletRead, type CourseRead, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
+import { InputField } from '../Library/InputField.tsx'
 
 
 interface HighlightsProps {
@@ -266,33 +267,30 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
               }
               {
                   experienceKind === "school" ? 
-                  <input 
-                    type="text" 
+                  <InputField 
                     required
+                    label=""
                     placeholder="Enter course name..." 
                     value={newCourseName}
-                    onChange={e => setNewCourseName(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    onChange={setNewCourseName}
                   />
                   : null
               }
               {
                   experienceKind === "school" ? 
-                  <input 
-                    type="text" 
+                  <InputField 
+                    label=""
                     placeholder="Enter course code..." 
                     value={newCourseCode}
-                    onChange={e => setNewCourseCode(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    onChange={setNewCourseCode}
                   />
                   : null
               }
-              <input 
-                type="text" 
+              <InputField 
+                label=""
                 placeholder="Enter sort order..." 
                 value={newSortOrder}
-                onChange={e => setNewSortOrder(e.target.value)}
-                className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                onChange={setNewSortOrder}
               />
               <button onClick={() => void handleCreateHighlight()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
             </div>
