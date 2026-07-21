@@ -12,7 +12,7 @@ module "rds" {
   db_username = var.db_username
   db_password = var.db_password
 
-  enable_deletion_protection = false
+  enable_deletion_protection = true
 
   vpc_id                      = data.terraform_remote_state.vpc.outputs.vpc_id
   webserver_security_group_id = data.terraform_remote_state.webserver.outputs.instance_security_group_id
