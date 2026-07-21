@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Schemas, type UserRegister } from '../types'
 import { useAuth } from '../auth/AuthContext'
 import { buildUrl } from '../api'
+import { InputField, PasswordField } from '../Library/InputField'
 
 
 async function registerUser(payload: UserRegister) {
@@ -73,19 +74,17 @@ function Authorization() {
         <section id="enter-credentials" className="m-4 flex flex-col gap-4">
           <div id="login-register-form" className="m-4 flex flex-col gap-2">
             <h2>Login/Register</h2>
-            <input 
-              type="text" 
+            <InputField 
+              label="Email:"
               placeholder="Enter email..." 
               value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+              onChange={setEmail}
             />
-            <input 
-              type="password" 
+            <PasswordField 
+              label="Password:"
               placeholder="Enter password..." 
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+              onChange={setPassword}
             />
             <div id="authorization-buttons" className="flex justify-between gap-2 w-full">
                 <button onClick={() => void handleLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Login</button>
