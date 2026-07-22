@@ -72,8 +72,9 @@ function Authorization() {
     return (
       <>
         <section id="enter-credentials" className="m-4 flex flex-col gap-4">
-          <div id="login-register-form" className="m-4 flex flex-col gap-2">
-            <h2>Login/Register</h2>
+          <div id="login-register-form" className="m-4 grid grid-cols gap-x-5 gap-y-2 items-center">
+            <h2 className="col-span-2">Login/Register</h2>
+
             <InputField 
               label="Email:"
               placeholder="Enter email..." 
@@ -86,7 +87,8 @@ function Authorization() {
               value={password}
               onChange={setPassword}
             />
-            <div id="authorization-buttons" className="flex justify-between gap-2 w-full">
+
+            <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full">
                 <button onClick={() => void handleLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Login</button>
                 <button onClick={() => void handleRegister()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Register</button>
             </div>

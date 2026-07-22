@@ -1,3 +1,5 @@
+import { fieldControlClass } from "./fieldStyles"
+
 interface CustomFieldProps {
     type: string
     label: string | null
@@ -34,23 +36,20 @@ interface DateFieldProps {
 const CustomField = (props: CustomFieldProps) => {
     return(
         <>
-            <div className="flex flex-row justify-between gap-5">
-                {   
-                    props.label ?
-                    <label htmlFor="abstract-input">
-                        {props.label}
-                    </label> : null
-                }
-                <input 
-                    id="abstract-input"
-                    type={props.type}
-                    required={props.required}
-                    placeholder={props.placeholder}
-                    value={props.value}
-                    onChange={e => props.onChange(e.target.value)}
-                    className="dark:bg-gray-50 rounded-md px-4 py-1"
-                />
-            </div>
+            {   
+                props.label ?
+                <label className="text-left">
+                    {props.label}
+                </label> : null
+            }
+            <input 
+                type={props.type}
+                required={props.required}
+                placeholder={props.placeholder}
+                value={props.value}
+                onChange={e => props.onChange(e.target.value)}
+                className={`${fieldControlClass}`}
+            />
         </>
     )
 }
