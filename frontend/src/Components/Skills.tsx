@@ -3,6 +3,7 @@ import { fetchApi } from '../api'
 import { Schemas, type SkillRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
 import { InputField } from '../Library/InputField'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface SkillsProps {
@@ -130,7 +131,7 @@ function Skills({ profileId, profileName }: SkillsProps) {
                 <select
                   value={newSkillCategory}
                   onChange={e => setNewSkillCategory(e.target.value)}
-                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                  className={fieldControlClass}
                 >
                     <option value="technical">Technical</option>
                     <option value="soft">Soft</option>

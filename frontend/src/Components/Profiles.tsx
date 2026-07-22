@@ -3,6 +3,7 @@ import { fetchApi } from '../api'
 import { Schemas, type ProfileRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
 import { InputField } from '../Library/InputField'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface ProfileProps {
@@ -121,16 +122,16 @@ function Profiles({ onProfileChange }: ProfileProps) {
               <div id="profile-selection" className="m-4 flex flex-col gap-2">
                 <h2>Select Profile</h2>
                 <select 
-                name="profile-specific" 
-                value={profileId}
-                onChange={e => handleSelectProfile(e.target.value)}
-                className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
-              >
-                <option value="">Select a profile</option>
-                {profiles.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
-                ))}
-              </select>
+                  name="profile-specific" 
+                  value={profileId}
+                  onChange={e => handleSelectProfile(e.target.value)}
+                  className={fieldControlClass}
+                >
+                  <option value="">Select a profile</option>
+                  {profiles.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
               </div>
         
               <div id="profile-creation" className="m-4 flex flex-col gap-2">

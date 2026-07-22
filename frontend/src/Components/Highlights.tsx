@@ -3,6 +3,7 @@ import { fetchApi } from '../api'
 import { Schemas, type BulletRead, type CourseRead, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 import { InputField } from '../Library/InputField.tsx'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface HighlightsProps {
@@ -246,7 +247,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
                 name="experience-specific" 
                 value={experienceId}
                 onChange={e => setExperienceId(e.target.value)}
-                className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+                className={fieldControlClass}
               >
                 <option value="">Select an experience</option>
                 {experiences.map(e => (
@@ -261,7 +262,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
                     placeholder="Enter experience body..." 
                     value={newExperienceBody}
                     onChange={e => setNewExperienceBody(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    className={fieldControlClass}
                   />
                   : null
               }

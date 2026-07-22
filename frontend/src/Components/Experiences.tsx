@@ -3,6 +3,7 @@ import { fetchApi } from '../api'
 import { Schemas, type ExperienceCreate, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
 import { DateField, InputField } from '../Library/InputField.tsx'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface ExperiencesProps {
@@ -170,7 +171,7 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
                     id="experience-kind"
                     value={newExperienceKind}
                     onChange={e => setNewExperienceKind(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+                    className={fieldControlClass}
                   >
                     <option value="work">Work</option>
                     <option value="school">School</option>
