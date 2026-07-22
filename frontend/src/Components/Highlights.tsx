@@ -79,6 +79,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
     useEffect(() => {
       setLoading(true)
       setError(null)
+
       if (!token || !profileId)
       {
         setLoading(false)
@@ -86,11 +87,21 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
       }
 
       if (experienceId === "") {
+        setHighlights([])
+        setExperienceKind("")
         setLoading(false)
         return
       }
 
-      const selectedExperienceKind = experiences.find(experience => experience.id === Number(experienceId))?.kind
+      const selected = experiences.find((e) => e.id === Number(experienceId))
+      if (!selected) {
+        setHighlights([])
+        setExperienceKind("")
+        setLoading(false)
+        return
+      }
+
+      const selectedExperienceKind = selected.kind
 
       let highlightsPath = null
       if (selectedExperienceKind === "work" || selectedExperienceKind === "side_project") {
@@ -101,6 +112,8 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
 
       setExperienceKind(selectedExperienceKind)
       if (highlightsPath === null) {
+        setHighlights([])
+        setExperienceKind("")
         setLoading(false)
         return
       }
@@ -124,71 +137,82 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
         })
         .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch highlights"))
         .finally(() => setLoading(false))
-    }, [experienceId, token, profileId]);
+    }, [experienceId, token, profileId, experiences]);
 
     useEffect(() => {
-        setLoading(true)
-        setError(null)
-        if (!token || !profileId)
-        {
-          setLoading(false)
-          return
-        }
+      setLoading(true)
+      setError(null)
+      if (!token || !profileId)
+      {
+        setLoading(false)
+        return
+      }
 
-        const experiencesPath = `profiles/${profileId}/experiences`
-    
-        fetchApi(experiencesPath, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          token: token
+      const experiencesPath = `profiles/${profileId}/experiences`
+  
+      fetchApi(experiencesPath, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        token: token
+      })
+        .then(data => {
+          const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
+          setExperiences(parsed.success ? parsed.data : [])
         })
-          .then(data => {
-            const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
-            setExperiences(parsed.success ? parsed.data : [])
-          })
-          .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
-          .finally(() => setLoading(false))
+        .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
+        .finally(() => setLoading(false))
     }, [token, profileId, experienceVersion]);
 
     useEffect(() => {
-        if (!token || !profileId)
-        {
-          setLoading(false)
-          return
-        }
+      if (!token || !profileId)
+      {
+        setLoading(false)
+        return
+      }
 
-        if (!experiences.length) {
-          setSchoolDegreeById({})
-          return
-        }
+      if (!experiences.length) {
+        setSchoolDegreeById({})
+        return
+      }
 
-        let cancelled = false
-        const schools = experiences.filter((e) => e.kind === 'school')
-        void Promise.all(
-          schools.map(async (e) => {
-            const data = await fetchApi(
-              `profiles/${profileId}/experiences/${e.id}/edu-details`,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                token: token
-              }
-            )
+      let cancelled = false
+      const schools = experiences.filter((e) => e.kind === 'school')
+      void Promise.all(
+        schools.map(async (e) => {
+          const data = await fetchApi(
+            `profiles/${profileId}/experiences/${e.id}/edu-details`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              token: token
+            }
+          )
 
-            const parsed = Schemas.EduDetailReadSchema.array().safeParse(data)
-            const deg =
-              parsed.success && parsed.data[0] ? parsed.data[0].degree : ''
-            return [e.id, deg] as const
-          }),
-        ).then((pairs) => {
-          if (!cancelled) setSchoolDegreeById(Object.fromEntries(pairs))
-        })
-        return () => {
-          cancelled = true
-        }
-      }, [experiences, token, profileId]);
+          const parsed = Schemas.EduDetailReadSchema.array().safeParse(data)
+          const deg =
+            parsed.success && parsed.data[0] ? parsed.data[0].degree : ''
+          return [e.id, deg] as const
+        }),
+      ).then((pairs) => {
+        if (!cancelled) setSchoolDegreeById(Object.fromEntries(pairs))
+      })
+      return () => {
+        cancelled = true
+      }
+    }, [experiences, token, profileId]);
+
+    useEffect(() => {
+      setExperienceId("")
+      setHighlights([])
+      setExperienceKind("")
+      setNewExperienceBody("")
+      setNewCourseName("")
+      setNewCourseCode("")
+      setNewSortOrder("")
+      setError(null)
+    }, [profileId])
   
     async function handleCreateHighlight() {
       if (!token || !profileId)
