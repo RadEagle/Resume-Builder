@@ -58,6 +58,7 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
 
     const { token } = useAuth()
   
+    // Fetch experiences when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)

@@ -37,6 +37,7 @@ function Profiles({ onProfileChange }: ProfileProps) {
 
     const { user, token } = useAuth()
 
+    // Reset profile selection when user changes
     useEffect(() => {
       if (user) {
         setProfileId("")
@@ -44,6 +45,7 @@ function Profiles({ onProfileChange }: ProfileProps) {
       }
     }, [user])
   
+    // Fetch profiles when token changes
     useEffect(() => {
       setLoading(true)
       setError(null)

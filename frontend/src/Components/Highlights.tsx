@@ -76,6 +76,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
 
     const { token } = useAuth()
   
+    // Fetch highlights when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)
@@ -139,6 +140,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
         .finally(() => setLoading(false))
     }, [experienceId, token, profileId, experiences]);
 
+    // Fetch experiences when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)
@@ -164,6 +166,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
         .finally(() => setLoading(false))
     }, [token, profileId, experienceVersion]);
 
+    // Fetch school degree by id when token or profileId changes
     useEffect(() => {
       if (!token || !profileId)
       {
@@ -203,6 +206,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
       }
     }, [experiences, token, profileId]);
 
+    // Reset state when profileId changes
     useEffect(() => {
       setExperienceId("")
       setHighlights([])

@@ -38,6 +38,7 @@ function Skills({ profileId, profileName }: SkillsProps) {
 
     const { token } = useAuth()
   
+    // Fetch skills when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)
