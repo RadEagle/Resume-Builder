@@ -5,6 +5,7 @@ import { z } from "zod" // ensure the same version of Zod is used
 // UserRead
 const UserReadSchema = z.object({
     id: z.int(),
+    username: z.string(),
     email: z.email(),
     created_at: z.coerce.date()
 });
