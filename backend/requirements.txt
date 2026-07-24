@@ -7,3 +7,4 @@ bcrypt
 pyjwt
 email-validator
 redis
+boto3

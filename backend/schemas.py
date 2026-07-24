@@ -1,8 +1,15 @@
 from datetime import datetime, date
 from pydantic import BaseModel, EmailStr, Field
-from typing import Literal, Optional
+from typing import Literal, Optional, Annotated
 
 
+# region Constants
+Username = Annotated[str, Field(min_length=3, max_length=15, pattern=r'^[a-zA-Z0-9]+$')]
+StrongPassword = Annotated[str, Field(min_length=6, pattern=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).+$')]
+
+# endregion
+
+# region Database Types
 # ProfileCreate
 class ProfileCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=20)
@@ -96,16 +103,19 @@ class SkillRead(BaseModel):
     name: str
     category: Literal["technical", "soft", "interest"]
 
+# endregion
 
+# region Authorization
 # UserRegister
 class UserRegister(BaseModel):
+    username: Username
     email: EmailStr
-    password: str = Field(..., min_length=6)
+    password: StrongPassword
 
 
 # UserLogin
 class UserLogin(BaseModel):
-    email: EmailStr
+    identifier: str = Field(..., min_length=1)
     password: str = Field(..., min_length=6)
 
 
@@ -122,3 +132,26 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"]
     user: UserRead
+
+
+# ForgotPasswordRequest
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+# ForgotPasswordResponse
+class ForgotPasswordResponse(BaseModel):
+    message: str
+
+
+# ResetPasswordRequest
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: StrongPassword
+
+
+# ResetPasswordResponse
+class ResetPasswordResponse(BaseModel):
+    message: str
+
+# endregion

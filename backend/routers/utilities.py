@@ -64,3 +64,27 @@ async def check_duplicate_email(email: str):
 
     if email_exists:
         raise HTTPException(status_code=409, detail="Email already used")
+
+async def check_duplicate_username(username: str):
+    try:
+        async with pool.connection() as conn:
+            async with conn.cursor(row_factory=dict_row) as cur:
+                await cur.execute(
+                    '''
+                    SELECT username FROM users
+                    WHERE LOWER(username) = LOWER(%s)
+                    ORDER BY id LIMIT 1
+                    ''',
+                    (username,),
+                )
+                username_exists = await cur.fetchone()
+    except Exception as e:
+        print(repr(e))
+        raise HTTPException(status_code=503, detail="Database unavailable")
+
+    if username_exists:
+        raise HTTPException(status_code=409, detail="Username already used")
+
+
+def get_frontend_url() -> str:
+    ...
