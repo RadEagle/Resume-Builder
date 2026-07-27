@@ -1,11 +1,26 @@
 from datetime import datetime, date
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, AfterValidator
 from typing import Literal, Optional, Annotated
 
 
+# region Validators
+def validate_strong_password(v: str) -> str:
+    if not (
+        any(c.islower() for c in v)
+        and any(c.isupper() for c in v)
+        and any(c.isdigit() for c in v)
+        and any(not c.isalnum() and not c.isspace() for c in v)
+    ):
+        raise ValueError(
+            "Password must include lowercase, uppercase, a digit, and a special character"
+        )
+    return v
+
+# endregion
+
 # region Constants
 Username = Annotated[str, Field(min_length=3, max_length=15, pattern=r'^[a-zA-Z0-9]+$')]
-StrongPassword = Annotated[str, Field(min_length=6, pattern=r'^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9\s]).+$')]
+StrongPassword = Annotated[str, Field(min_length=6), AfterValidator(validate_strong_password)]
 
 # endregion
 

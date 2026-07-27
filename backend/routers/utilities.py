@@ -1,6 +1,12 @@
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+import logging
 from fastapi import HTTPException
 from database import pool
 from psycopg.rows import dict_row
+import boto3
+from botocore.exceptions import ClientError
 
 
 async def ensure_profile_id_exists(profile_id: int, user_id):
@@ -87,4 +93,60 @@ async def check_duplicate_username(username: str):
 
 
 def get_frontend_url() -> str:
-    ...
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    FRONTEND_URL = os.getenv("FRONTEND_URL")
+    log = logging.getLogger(__name__)
+
+    if not FRONTEND_URL:
+        log.exception("No frontend URL defined")
+
+    return FRONTEND_URL
+
+
+def send_password_reset_email(to_email, reset_link):
+    load_dotenv(Path(__file__).resolve().parent / ".env")
+    SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL")
+    AWS_REGION = os.getenv("AWS_REGION")
+    log = logging.getLogger(__name__)
+
+    if not SES_FROM_EMAIL:
+        log.warning("SES not configured")
+        return False
+
+    if not AWS_REGION:
+        log.warning("AWS Region not configured")
+        return False
+
+    template = (Path(__file__).resolve().parent.parent / "templates" / "reset_password.html").read_text(encoding="utf-8")
+    html_body = template.replace("{{reset_link}}", reset_link)
+
+    client = boto3.client("ses", region_name=AWS_REGION)
+    try:
+        client.send_email(
+            Source=SES_FROM_EMAIL,
+            Destination={
+                'ToAddresses': [to_email]
+            },
+            Message={
+                'Subject': {
+                    'Charset': 'UTF-8',
+                    'Data': "reset your password",
+                },
+                'Body': {
+                    'Html': {
+                        'Charset': 'UTF-8',
+                        'Data': html_body,
+                    },
+                    'Text': {
+                        'Charset': 'UTF-8',
+                        'Data': f"Reset your password: {reset_link}",
+                    }
+                }
+            },
+        )
+
+        return True
+
+    except ClientError:
+        log.exception("SES send failed")
+        return False

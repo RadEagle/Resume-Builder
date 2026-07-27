@@ -103,8 +103,10 @@ async def forgot_password(body: ForgotPasswordRequest):
 
     if user_dict and redis_client_exists():
         token = await store_reset_token(user_dict["id"])
-        link = f"{utilities.get_frontend_url()}/?reset_token={token}"
-        # TODO: send email via SES
+        frontend_url = utilities.get_frontend_url()
+        if token and frontend_url:
+            link = f"{frontend_url}?reset_token={token}"
+            utilities.send_password_reset_email(body.email, link)
 
     response = ForgotPasswordResponse(
         message="Request to change password sent"
