@@ -44,3 +44,7 @@ def redis_client_exists() -> bool:
     if _redis:
         return True
     return False
+
+
+def get_redis():
+    return _redis;
