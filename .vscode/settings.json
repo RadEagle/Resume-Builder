@@ -6,7 +6,8 @@
 // }
 
 {
-    "typescript.tsdk": "frontend/node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true,
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true
-  }
+  "python.terminal.useEnvFile": true,
+  "js/ts.tsdk.path": "frontend/node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": true
+}
