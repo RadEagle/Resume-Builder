@@ -98,13 +98,13 @@ def get_frontend_url() -> str:
     log = logging.getLogger(__name__)
 
     if not FRONTEND_URL:
-        log.exception("No frontend URL defined")
+        log.warning("No frontend URL defined")
 
-    return FRONTEND_URL
+    return FRONTEND_URL.strip("/")
 
 
 def send_password_reset_email(to_email, reset_link):
-    load_dotenv(Path(__file__).resolve().parent / ".env")
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
     SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL")
     AWS_REGION = os.getenv("AWS_REGION")
     log = logging.getLogger(__name__)

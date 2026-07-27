@@ -105,7 +105,7 @@ async def forgot_password(body: ForgotPasswordRequest):
         token = await store_reset_token(user_dict["id"])
         frontend_url = utilities.get_frontend_url()
         if token and frontend_url:
-            link = f"{frontend_url}?reset_token={token}"
+            link = f"{frontend_url}/?reset_token={token}"
             utilities.send_password_reset_email(body.email, link)
 
     response = ForgotPasswordResponse(
