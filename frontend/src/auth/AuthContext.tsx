@@ -9,6 +9,7 @@ type AuthValue = {
     token: string | null
     login: (payload: UserLogin) => Promise<void>
     logout: () => void
+    error: string | null
 }
 
 
@@ -20,6 +21,7 @@ const AuthContext = createContext<AuthValue | undefined>(undefined)
 const AuthProvider = ({ children }: PropsWithChildren) => {
     const [user, setUser] = useState<UserRead | null>(null)
     const [token, setToken] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     const login = async (payload: UserLogin) => {
         const response = await fetch(buildUrl("auth/login"), {
@@ -31,8 +33,26 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         })
 
         if (!response.ok) {
-            console.error("Login failed", response.statusText)
-            throw new Error("Login failed")
+            let message = "Login failed"
+            try {
+                const body = await response.json()
+                const detail = body.detail
+                if (typeof(detail) === "string") {
+                    message = detail
+                }
+                else if (Array.isArray(detail)) {
+                    message = ""
+                    for (const line of detail) {
+                        message = message ? `${message}, ${line}` : line
+                    }
+                }
+            }
+            catch (e) {
+                setError(e instanceof Error ? e.message : "Something went wrong")
+            }
+
+            console.error(message, response.statusText)
+            throw new Error(message)
         }
 
         const data = await response.json()
@@ -52,7 +72,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
     
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout, error }}>
             {children}
         </AuthContext.Provider>
     )
