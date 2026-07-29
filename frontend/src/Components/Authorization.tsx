@@ -68,8 +68,9 @@ function Authorization() {
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
     const [authMode, setAuthMode] = useState("login")
-    const { login, setUser, setToken } = useAuth()
+    const { error, login, setUser, setToken, setError } = useAuth()
   
     async function handleLogin() {
       try {
@@ -89,6 +90,11 @@ function Authorization() {
     }
 
     async function handleRegister() {
+      if (password !== confirmPassword) {
+        setError("Passwords do not match")
+        return
+      }
+
       try {
         const userPayload = Schemas.UserRegisterSchema.parse({
             username: username.trim(),
@@ -142,6 +148,11 @@ function Authorization() {
     }
 
     async function handleResetPassword() {
+      if (password !== confirmPassword) {
+        setError("Passwords do not match")
+        return
+      }
+
       const token = new URLSearchParams(window.location.search).get("reset_token")
       try {
         const resetPasswordPayload = Schemas.ResetPasswordRequestSchema.parse({
@@ -153,6 +164,7 @@ function Authorization() {
         console.log(response)
 
         setPassword("")
+        setConfirmPassword("")
       } catch (e) {
         // set error state if you want
       }
@@ -195,6 +207,8 @@ function Authorization() {
       setUsername("")
       setEmail("")
       setPassword("")
+      setConfirmPassword("")
+      setError(null)
     }
 
     function handleSwitchToRegister() {
@@ -204,6 +218,7 @@ function Authorization() {
 
       setIdentifier("")
       setPassword("")
+      setError(null)
     }
   
     return (
@@ -227,7 +242,14 @@ function Authorization() {
             authMode === "reset" ?
             <h2 className="col-span-2">Reset Password</h2> : null
           }
-        
+
+          {
+            error ?
+            <div id="error-message" className="col-span-2 text-start text-sm text-red-500">
+              {error}
+            </div> : null
+          } 
+
           <div id="authorization-form" className="m-4 grid grid-cols gap-x-5 gap-y-2 items-center">
             <form className="col-span-2 grid grid-cols-subgrid gap-y-2 items-center" onKeyDown={(e) => handleKeyDown(e)}>
               {
@@ -254,7 +276,7 @@ function Authorization() {
               {
                 authMode === "register" || authMode === "forgot" ?
                 <InputField 
-                  required
+                  required={authMode === "register"}
                   label="Email:"
                   placeholder="Enter email..." 
                   value={email}
@@ -265,15 +287,37 @@ function Authorization() {
               {
                 authMode === "login" || authMode === "register" || authMode === "reset" ?
                 <PasswordField 
-                  required={authMode === "register"}
+                  required={authMode === "register" || authMode === "reset"}
                   label="Password:"
                   placeholder="Enter password..." 
                   value={password}
                   onChange={setPassword}
                 /> : null
               }
+
+              {
+                authMode === "register" ?
+                <PasswordField 
+                  required={authMode === "register" || authMode === "reset"}
+                  label="Confirm Password:"
+                  placeholder="Enter password again..." 
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                /> : null
+              }
               
             </form>
+
+            {
+              authMode === "register" ?
+              <div id="password-reqs" className="col-span-2 text-start text-sm">
+                <p>At least 6 characters long</p>
+                <p>Contains at least one uppercase letter (e.g., A-Z)</p>
+                <p>Contains at least one lowercase letter (e.g., a-z)</p>
+                <p>Contains at least one number (e.g., 0-9)</p>
+                <p>Contains at least one special character (e.g., !@#$%^&*)</p>
+              </div> : null
+            }
 
             <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full">
                 {
