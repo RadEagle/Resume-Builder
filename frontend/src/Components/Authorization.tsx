@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import { Schemas, type UserRegister } from '../types'
 import { useAuth } from '../auth/AuthContext'
 import { buildUrl } from '../api'
@@ -73,7 +74,7 @@ function Authorization() {
       }
     }
 
-    function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+    function handleKeyDown(e: KeyboardEvent<HTMLFormElement>) {
       if (e.key !== "Enter") return
       e.preventDefault()
 

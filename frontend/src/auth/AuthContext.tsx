@@ -42,10 +42,12 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
                 }
                 else if (Array.isArray(detail)) {
                     message = ""
-                    for (const line of detail) {
+                    for (const item of detail) {
+                        const line = item.msg ? item.msg : String(item)
                         message = message ? `${message}, ${line}` : line
                     }
                 }
+                setError(message)
             }
             catch (e) {
                 setError(e instanceof Error ? e.message : "Something went wrong")
@@ -58,17 +60,20 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         const data = await response.json()
         const parsed = Schemas.TokenResponseSchema.safeParse(data)
         if (!parsed.success) {
+            // this shouldn't be a user-facing error
             console.error("Invalid response format", parsed.error)
             throw new Error("Invalid response format")
         }
 
         setUser(parsed.data.user)
         setToken(parsed.data.access_token)
+        setError(null)
     }
 
     const logout = () => {
         setUser(null)
         setToken(null)
+        setError(null)
     }
     
     return (
