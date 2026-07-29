@@ -69,7 +69,7 @@ function Authorization() {
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [authMode, setAuthMode] = useState("login")
-    const { login } = useAuth()
+    const { login, setUser, setToken } = useAuth()
   
     async function handleLogin() {
       try {
@@ -104,8 +104,8 @@ function Authorization() {
         console.log(parsed.data)
 
         // after registering, login the user
-        setIdentifier(email)
-        handleLogin()
+        setUser(parsed.data.user)
+        setToken(parsed.data.access_token)
         
       } catch (e) {
         // set error state if you want
@@ -142,7 +142,7 @@ function Authorization() {
     }
 
     async function handleResetPassword() {
-      const token = new URLSearchParams(window.location.search).get("reset-token")
+      const token = new URLSearchParams(window.location.search).get("reset_token")
       try {
         const resetPasswordPayload = Schemas.ResetPasswordRequestSchema.parse({
           token: token?.trim(),
@@ -214,7 +214,7 @@ function Authorization() {
             <div id="auth-tab-section" className="grid grid-cols-2 gap-x-2 justify-evenly items-center relative">
               <h2 onClick={handleSwitchToLogin} className="hover:cursor-pointer">Login</h2>
               <h2 onClick={handleSwitchToRegister} className="hover:cursor-pointer">Register</h2>
-              <div className={`h-0.5 bg-blue-300 w-1/2 absolute left-0 bottom-0 transition duration-300 ease-out ${authMode === 'register' ? "translate-x-full" : "translate-x-0"} `}></div>
+              <div className={`h-0.5 bg-blue-300 w-1/2 absolute left-0 -bottom-1 transition duration-300 ease-out ${authMode === 'register' ? "translate-x-full" : "translate-x-0"} `}></div>
             </div> : null
           }
 
@@ -243,6 +243,7 @@ function Authorization() {
               {
                 authMode === "register" ?
                 <InputField 
+                  required
                   label="Username:"
                   placeholder="Enter username..." 
                   value={username}
@@ -253,6 +254,7 @@ function Authorization() {
               {
                 authMode === "register" || authMode === "forgot" ?
                 <InputField 
+                  required
                   label="Email:"
                   placeholder="Enter email..." 
                   value={email}
@@ -263,6 +265,7 @@ function Authorization() {
               {
                 authMode === "login" || authMode === "register" || authMode === "reset" ?
                 <PasswordField 
+                  required={authMode === "register"}
                   label="Password:"
                   placeholder="Enter password..." 
                   value={password}

@@ -10,6 +10,9 @@ type AuthValue = {
     login: (payload: UserLogin) => Promise<void>
     logout: () => void
     error: string | null
+    
+    setUser: (user: UserRead | null) => void
+    setToken: (token: string | null) => void
 }
 
 
@@ -77,7 +80,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     }
     
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, error }}>
+        <AuthContext.Provider value={{ user, token, login, logout, error, setUser, setToken }}>
             {children}
         </AuthContext.Provider>
     )
