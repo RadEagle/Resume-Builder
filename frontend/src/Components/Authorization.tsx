@@ -4,6 +4,7 @@ import { Schemas, type ForgotPasswordRequest, type ResetPasswordRequest, type Us
 import { useAuth } from '../auth/AuthContext'
 import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
+import { buttonControlClass } from '../Library/fieldStyles'
 
 
 async function registerUser(payload: UserRegister) {
@@ -310,7 +311,7 @@ function Authorization() {
 
             {
               authMode === "register" ?
-              <div id="password-reqs" className="col-span-2 text-start text-sm">
+              <div id="password-reqs" className="col-span-2 text-start text-xs">
                 <p>At least 6 characters long</p>
                 <p>Contains at least one uppercase letter (e.g., A-Z)</p>
                 <p>Contains at least one lowercase letter (e.g., a-z)</p>
@@ -319,31 +320,33 @@ function Authorization() {
               </div> : null
             }
 
+            <br/>
+
             <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full">
                 {
                   authMode === "login" ?
                   <>
-                    <button onClick={() => void handleLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Login</button>
-                    <button onClick={() => void handleForgotPassword()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Forgot Password?</button> 
+                    <button onClick={() => void handleLogin()} className={buttonControlClass}>Login</button>
+                    <button onClick={() => void handleForgotPassword()} className={buttonControlClass}>Forgot Password?</button> 
                   </> : null
                 }
                 
                 {
                   authMode === "register" ?
-                  <button onClick={() => void handleRegister()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Register</button> : null
+                  <button onClick={() => void handleRegister()} className={buttonControlClass}>Register</button> : null
                 }
 
                 {
                   authMode === "forgot" ?
                   <>
-                    <button onClick={() => void handleBackToLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Back to Login</button>
-                    <button onClick={() => void handleSendEmail()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Submit</button> 
+                    <button onClick={() => void handleBackToLogin()} className={buttonControlClass}>Back to Login</button>
+                    <button onClick={() => void handleSendEmail()} className={buttonControlClass}>Submit</button> 
                   </> : null
                 }
 
                 {
                   authMode === "reset" ?
-                  <button onClick={() => void handleResetPassword()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Reset Password</button> : null
+                  <button onClick={() => void handleResetPassword()} className={buttonControlClass}>Reset Password</button> : null
                 }
             </div>
           </div>
