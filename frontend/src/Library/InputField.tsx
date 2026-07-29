@@ -7,6 +7,7 @@ interface CustomFieldProps {
     placeholder: string
     required?: boolean
     onChange: (e: string) => void
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 interface InputFieldProps {
@@ -15,6 +16,7 @@ interface InputFieldProps {
     placeholder: string
     required?: boolean
     onChange: (e: string) => void
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 interface PasswordFieldProps {
@@ -23,6 +25,7 @@ interface PasswordFieldProps {
     placeholder: string
     required?: boolean
     onChange: (e: string) => void
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 interface DateFieldProps {
@@ -31,6 +34,7 @@ interface DateFieldProps {
     placeholder: string
     required?: boolean
     onChange: (e: string) => void
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
 }
 
 const CustomField = (props: CustomFieldProps) => {
@@ -40,6 +44,7 @@ const CustomField = (props: CustomFieldProps) => {
                 props.label ?
                 <label className="text-left">
                     {props.label}
+                    {props.required ? <span className="text-red-500"> *</span> : null}
                 </label> : null
             }
             <input 
@@ -48,6 +53,7 @@ const CustomField = (props: CustomFieldProps) => {
                 placeholder={props.placeholder}
                 value={props.value}
                 onChange={e => props.onChange(e.target.value)}
+                onKeyDown={props.onKeyDown}
                 className={`${fieldControlClass}`}
             />
         </>
@@ -64,6 +70,7 @@ const InputField = (props: InputFieldProps) => {
               placeholder={props.placeholder}
               value={props.value}
               onChange={props.onChange}
+              onKeyDown={props.onKeyDown}
             />
         </>
     )
@@ -79,6 +86,7 @@ const PasswordField = (props: PasswordFieldProps) => {
               placeholder={props.placeholder}
               value={props.value}
               onChange={props.onChange}
+              onKeyDown={props.onKeyDown}
             />
         </>
     )
@@ -94,6 +102,7 @@ const DateField = (props: DateFieldProps) => {
               placeholder={props.placeholder}
               value={props.value}
               onChange={props.onChange}
+              onKeyDown={props.onKeyDown}
             />
         </>
     )

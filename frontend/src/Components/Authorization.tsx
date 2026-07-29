@@ -26,21 +26,24 @@ async function registerUser(payload: UserRegister) {
 }
 
 function Authorization() {
+    const [identifier, setIdentifier] = useState("")
+    const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [authMode, setAuthMode] = useState("login")
     const { login } = useAuth()
   
     async function handleLogin() {
       try {
         const userPayload = Schemas.UserLoginSchema.parse({
-            email: email.trim(),
+            identifier: identifier.trim(),
             password: password.trim()
         })
 
         const response = await login(userPayload)
         console.log(response)
 
-        setEmail("")
+        setIdentifier("")
         setPassword("")
       } catch (e) {
         // set error state if you want
@@ -50,6 +53,7 @@ function Authorization() {
     async function handleRegister() {
       try {
         const userPayload = Schemas.UserRegisterSchema.parse({
+            username: username.trim(),
             email: email.trim(),
             password: password.trim()
         })
@@ -68,6 +72,29 @@ function Authorization() {
         // set error state if you want
       }
     }
+
+    function handleKeyDown(e: React.KeyboardEvent<HTMLFormElement>) {
+      if (e.key !== "Enter") return
+      e.preventDefault()
+
+      // if not on last field, focus on next field
+      const form = e.currentTarget
+      const fieldIndex = Array.prototype.indexOf.call(form.elements, e.target)
+      const nextElement = form.elements[fieldIndex + 1]
+      if (nextElement) {
+        (nextElement as HTMLElement).focus()
+      }
+      else {
+        switch(authMode) {
+          case 'login': 
+            handleLogin()
+            break
+          case 'register':
+            handleRegister()
+            break
+        }
+      }
+    }
   
     return (
       <>
@@ -75,18 +102,27 @@ function Authorization() {
           <div id="login-register-form" className="m-4 grid grid-cols gap-x-5 gap-y-2 items-center">
             <h2 className="col-span-2">Login/Register</h2>
 
-            <InputField 
-              label="Email:"
-              placeholder="Enter email..." 
-              value={email}
-              onChange={setEmail}
-            />
-            <PasswordField 
-              label="Password:"
-              placeholder="Enter password..." 
-              value={password}
-              onChange={setPassword}
-            />
+            <form className="col-span-2 grid grid-cols-subgrid gap-y-2" onKeyDown={(e) => handleKeyDown(e)}>
+              <InputField 
+                label="Username:"
+                placeholder="Enter username..." 
+                value={username}
+                onChange={setUsername}
+              />
+              <InputField 
+                label="Email:"
+                placeholder="Enter email..." 
+                value={email}
+                onChange={setEmail}
+              />
+              <PasswordField 
+                label="Password:"
+                placeholder="Enter password..." 
+                value={password}
+                onChange={setPassword}
+              />
+            </form>
+
 
             <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full">
                 <button onClick={() => void handleLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Login</button>

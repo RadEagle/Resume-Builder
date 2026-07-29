@@ -18,7 +18,7 @@ const StrongPasswordSchema = z.string()
 // UserRead
 const UserReadSchema = z.object({
     id: z.int(),
-    username: UsernameSchema,
+    username: z.string().trim(),
     email: z.email(),
     created_at: z.coerce.date()
 });
@@ -149,8 +149,8 @@ export const Schemas = {
 
     // UserLogin
     UserLoginSchema: z.object({
-        identifier: z.string(),
-        password: StrongPasswordSchema
+        identifier: z.string().trim().min(1),
+        password: z.string()
     }),
 
     // ForgotPasswordRequestSchema
