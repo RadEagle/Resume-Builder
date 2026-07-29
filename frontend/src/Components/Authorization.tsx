@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
-import { Schemas, type UserRegister } from '../types'
+import { Schemas, type ForgotPasswordRequest, type ResetPasswordRequest, type UserRegister } from '../types'
 import { useAuth } from '../auth/AuthContext'
 import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
@@ -23,7 +23,44 @@ async function registerUser(payload: UserRegister) {
   } catch (e) {
     throw new Error("Failed to register user - unknown error")
   }
-  
+}
+
+async function sendEmail(payload: ForgotPasswordRequest) {
+  try {
+    const response = await fetch(buildUrl("auth/forgot-password"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    if (!response.ok) {
+      throw new Error("Failed to send email - fetch error")
+    }
+    
+    return response.json()
+  } catch (e) {
+    throw new Error("Failed to send email - unknown error")
+  }
+}
+
+async function resetPassword(payload: ResetPasswordRequest) {
+  try {
+    const response = await fetch(buildUrl("auth/reset-password"), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    })
+    if (!response.ok) {
+      throw new Error("Failed to reset password - fetch error")
+    }
+    
+    return response.json()
+  } catch (e) {
+    throw new Error("Failed to reset password - unknown error")
+  }
 }
 
 function Authorization() {
@@ -67,8 +104,55 @@ function Authorization() {
         console.log(parsed.data)
 
         // after registering, login the user
+        setIdentifier(email)
         handleLogin()
         
+      } catch (e) {
+        // set error state if you want
+      }
+    }
+
+    function handleForgotPassword() {
+      setAuthMode("forgot")
+
+      setIdentifier("")
+      setUsername("")
+      setPassword("")
+    }
+
+    function handleBackToLogin() {
+      setAuthMode("login")
+
+      setEmail("")
+    }
+
+    async function handleSendEmail() {
+      try {
+        const forgotPasswordPayload = Schemas.ForgotPasswordRequestSchema.parse({
+            email: email.trim()
+        })
+
+        const response = await sendEmail(forgotPasswordPayload)
+        console.log(response)
+
+        setEmail("")
+      } catch (e) {
+        // set error state if you want
+      }
+    }
+
+    async function handleResetPassword() {
+      const token = new URLSearchParams(window.location.search).get("reset-token")
+      try {
+        const resetPasswordPayload = Schemas.ResetPasswordRequestSchema.parse({
+          token: token?.trim(),
+          password: password.trim()
+        })
+
+        const response = await resetPassword(resetPasswordPayload)
+        console.log(response)
+
+        setPassword("")
       } catch (e) {
         // set error state if you want
       }
@@ -93,41 +177,127 @@ function Authorization() {
           case 'register':
             handleRegister()
             break
+          case 'forgot':
+            handleSendEmail()
+            break
+          case 'reset':
+            handleResetPassword()
+            break
         }
       }
+    }
+
+    function handleSwitchToLogin() {
+      if (authMode === "login") return
+
+      setAuthMode("login")
+
+      setUsername("")
+      setEmail("")
+      setPassword("")
+    }
+
+    function handleSwitchToRegister() {
+      if (authMode === "register") return
+
+      setAuthMode("register")
+
+      setIdentifier("")
+      setPassword("")
     }
   
     return (
       <>
-        <section id="enter-credentials" className="m-4 flex flex-col gap-4">
-          <div id="login-register-form" className="m-4 grid grid-cols gap-x-5 gap-y-2 items-center">
-            <h2 className="col-span-2">Login/Register</h2>
+        <section id="enter-credentials" className="m-4 flex flex-col gap-4 min-w-lg min-h-64">
+          {
+            authMode === "login" || authMode === "register" ?
+            <div id="auth-tab-section" className="grid grid-cols-2 gap-x-2 justify-evenly items-center relative">
+              <h2 onClick={handleSwitchToLogin} className="hover:cursor-pointer">Login</h2>
+              <h2 onClick={handleSwitchToRegister} className="hover:cursor-pointer">Register</h2>
+              <div className={`h-0.5 bg-blue-300 w-1/2 absolute left-0 bottom-0 transition duration-300 ease-out ${authMode === 'register' ? "translate-x-full" : "translate-x-0"} `}></div>
+            </div> : null
+          }
 
-            <form className="col-span-2 grid grid-cols-subgrid gap-y-2" onKeyDown={(e) => handleKeyDown(e)}>
-              <InputField 
-                label="Username:"
-                placeholder="Enter username..." 
-                value={username}
-                onChange={setUsername}
-              />
-              <InputField 
-                label="Email:"
-                placeholder="Enter email..." 
-                value={email}
-                onChange={setEmail}
-              />
-              <PasswordField 
-                label="Password:"
-                placeholder="Enter password..." 
-                value={password}
-                onChange={setPassword}
-              />
+          {
+            authMode === "forgot" ?
+            <h2 className="col-span-2">Forgot Password?</h2> : null
+          }
+
+          {
+            authMode === "reset" ?
+            <h2 className="col-span-2">Reset Password</h2> : null
+          }
+        
+          <div id="authorization-form" className="m-4 grid grid-cols gap-x-5 gap-y-2 items-center">
+            <form className="col-span-2 grid grid-cols-subgrid gap-y-2 items-center" onKeyDown={(e) => handleKeyDown(e)}>
+              {
+                authMode === "login" ?
+                <InputField 
+                  label="Email or Username:"
+                  placeholder="Enter..." 
+                  value={identifier}
+                  onChange={setIdentifier}
+                /> : null
+              }
+
+              {
+                authMode === "register" ?
+                <InputField 
+                  label="Username:"
+                  placeholder="Enter username..." 
+                  value={username}
+                  onChange={setUsername}
+                /> : null
+              }
+
+              {
+                authMode === "register" || authMode === "forgot" ?
+                <InputField 
+                  label="Email:"
+                  placeholder="Enter email..." 
+                  value={email}
+                  onChange={setEmail}
+                /> : null
+              }
+              
+              {
+                authMode === "login" || authMode === "register" || authMode === "reset" ?
+                <PasswordField 
+                  label="Password:"
+                  placeholder="Enter password..." 
+                  value={password}
+                  onChange={setPassword}
+                /> : null
+              }
+              
             </form>
 
-
             <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full">
-                <button onClick={() => void handleLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Login</button>
-                <button onClick={() => void handleRegister()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Register</button>
+                {
+                  authMode === "login" ?
+                  <>
+                    <button onClick={() => void handleLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Login</button>
+                    <button onClick={() => void handleForgotPassword()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Forgot Password?</button> 
+                  </> : null
+                }
+                
+                {
+                  authMode === "register" ?
+                  <button onClick={() => void handleRegister()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Register</button> : null
+                }
+
+                {
+                  authMode === "forgot" ?
+                  <>
+                    <button onClick={() => void handleBackToLogin()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Back to Login</button>
+                    <button onClick={() => void handleSendEmail()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Submit</button> 
+                  </> : null
+                }
+
+                {
+                  authMode === "reset" ?
+                  <button onClick={() => void handleResetPassword()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500 w-full">Reset Password</button> : null
+                }
             </div>
           </div>
         </section>
