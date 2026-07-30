@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthContext'
 import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
 import { buttonControlClass } from '../Library/fieldStyles'
+import { Criteria } from '../Library/Criteria'
 
 
 async function registerUser(payload: UserRegister) {
@@ -312,11 +313,30 @@ function Authorization() {
             {
               authMode === "register" ?
               <div id="password-reqs" className="col-span-2 text-start text-xs">
-                <p>At least 6 characters long</p>
-                <p>Contains at least one uppercase letter (e.g., A-Z)</p>
-                <p>Contains at least one lowercase letter (e.g., a-z)</p>
-                <p>Contains at least one number (e.g., 0-9)</p>
-                <p>Contains at least one special character (e.g., !@#$%^&*)</p>
+                <Criteria 
+                    value="At least 6 characters long" 
+                    condition={password.length >= 6}
+                />
+                <Criteria 
+                    value="Contains at least one uppercase letter (e.g., A-Z)" 
+                    condition={!!password.match(/[A-Z]/)}
+                />
+                <Criteria 
+                    value="Contains at least one lowercase letter (e.g., a-z)" 
+                    condition={!!password.match(/[a-z]/)}
+                />
+                <Criteria 
+                    value="Contains at least one number (e.g., 0-9)" 
+                    condition={!!password.match(/[0-9]/)}
+                />
+                <Criteria 
+                    value="Contains at least one special character (e.g., !@#$%^&*)" 
+                    condition={!!password.match(/[!@#$%^&*]/)}
+                />
+                <Criteria 
+                    value="Passwords must match" 
+                    condition={password === confirmPassword && password.length > 0}
+                />
               </div> : null
             }
 

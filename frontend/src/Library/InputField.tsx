@@ -38,7 +38,7 @@ interface DateFieldProps {
 }
 
 const CustomField = (props: CustomFieldProps) => {
-    return(
+    return (
         <>
             {   
                 props.label ?
