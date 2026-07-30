@@ -6,6 +6,7 @@ import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
 import { buttonControlClass } from '../Library/fieldStyles'
 import { Criteria } from '../Library/Criteria'
+import { ErrorBanner, SuccessBanner } from '../Library/Banner'
 
 
 async function registerUser(payload: UserRegister) {
@@ -246,13 +247,10 @@ function Authorization() {
           }
 
           {
-            error ?
-            <div id="error-message" className="col-span-2 text-start text-sm text-red-500">
-              {error}
-            </div> : null
+            error ? <ErrorBanner value={error} /> : null
           } 
 
-          <div id="authorization-form" className="m-4 grid grid-cols gap-x-5 gap-y-2 items-center">
+          <div id="authorization-form" className="my-4 grid grid-cols gap-x-5 gap-y-2 items-center">
             <form className="col-span-2 grid grid-cols-subgrid gap-y-2 items-center" onKeyDown={(e) => handleKeyDown(e)}>
               {
                 authMode === "login" ?
