@@ -6,7 +6,8 @@ import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
 import { buttonControlClass } from '../Library/fieldStyles'
 import { Criteria } from '../Library/Criteria'
-import { ErrorBanner, SuccessBanner } from '../Library/Banner'
+import { ErrorBanner } from '../Library/Banner'
+import z from 'zod'
 
 
 async function registerUser(payload: UserRegister) {
@@ -117,7 +118,13 @@ function Authorization() {
         setToken(parsed.data.access_token)
         
       } catch (e) {
-        // set error state if you want
+        if (e instanceof z.ZodError) {
+          setError(e.issues[0]?.message ?? "Invalid input")
+        } else if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          setError("Failed to register user")
+        }
       }
     }
 
@@ -226,7 +233,7 @@ function Authorization() {
   
     return (
       <>
-        <section id="enter-credentials" className="m-4 flex flex-col gap-4 min-w-lg min-h-64">
+        <section id="enter-credentials" className="m-4 flex flex-col min-w-lg min-h-64">
           {
             authMode === "login" || authMode === "register" ?
             <div id="auth-tab-section" className="grid grid-cols-2 gap-x-2 justify-evenly items-center relative">
@@ -245,6 +252,8 @@ function Authorization() {
             authMode === "reset" ?
             <h2 className="col-span-2">Reset Password</h2> : null
           }
+
+          <br/>
 
           {
             error ? <ErrorBanner value={error} /> : null

@@ -3,16 +3,16 @@ import { z } from "zod" // ensure the same version of Zod is used
 
 // Define Type Constants
 const UsernameSchema = z.string()
-    .min(3, { error: "Must be at least 3 characters long" })
-    .max(15, { error: "Must be at most 15 characters long" })
-    .regex(/^[a-zA-Z0-9]+$/, { error: "Must contain only alphanumeric characters " })
+    .min(3, { error: "Username must be at least 3 characters long" })
+    .max(15, { error: "Username must be at most 15 characters long" })
+    .regex(/^[a-zA-Z0-9]+$/, { error: "Username must contain only alphanumeric characters " })
 
 const StrongPasswordSchema = z.string()
-    .min(6, { error: "Must be at least 6 characters long" })
-    .regex(/[a-z]/, { error: "Must contain at least 1 lowercase letter" })
-    .regex(/[A-Z]/, { error: "Must contain at least 1 uppercase letter" })
-    .regex(/[0-9]/, { error: "Must contain at least 1 number" })
-    .regex(/[^a-zA-Z0-9\s]/, { error: "Must contain at least 1 special character" })
+    .min(6, { error: "Password must be at least 6 characters long" })
+    .regex(/[a-z]/, { error: "Password must contain at least 1 lowercase letter" })
+    .regex(/[A-Z]/, { error: "Password must contain at least 1 uppercase letter" })
+    .regex(/[0-9]/, { error: "Password must contain at least 1 number" })
+    .regex(/[^a-zA-Z0-9\s]/, { error: "Password must contain at least 1 special character" })
 
 // Define Nested Schemas first
 // UserRead

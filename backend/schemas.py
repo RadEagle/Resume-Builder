@@ -131,7 +131,7 @@ class UserRegister(BaseModel):
 # UserLogin
 class UserLogin(BaseModel):
     identifier: str = Field(..., min_length=1)
-    password: str = Field(..., min_length=6)
+    password: str
 
 
 # UserRead
