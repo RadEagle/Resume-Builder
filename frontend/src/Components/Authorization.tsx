@@ -6,7 +6,7 @@ import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
 import { buttonControlClass } from '../Library/fieldStyles'
 import { Criteria } from '../Library/Criteria'
-import { ErrorBanner } from '../Library/Banner'
+import { ErrorBanner, SuccessBanner } from '../Library/Banner'
 import z from 'zod'
 
 
@@ -74,6 +74,7 @@ function Authorization() {
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [authMode, setAuthMode] = useState("login")
+    const [successMsg, setSuccessMsg] = useState("")
     const { error, login, setUser, setToken, setError } = useAuth()
   
     async function handleLogin() {
@@ -134,12 +135,15 @@ function Authorization() {
       setIdentifier("")
       setUsername("")
       setPassword("")
+      setError(null)
     }
 
     function handleBackToLogin() {
       setAuthMode("login")
 
       setEmail("")
+      setError(null)
+      setSuccessMsg("")
     }
 
     async function handleSendEmail() {
@@ -152,8 +156,15 @@ function Authorization() {
         console.log(response)
 
         setEmail("")
+        setSuccessMsg("Email sent successfully. Check your inbox for a password reset link.")
       } catch (e) {
-        // set error state if you want
+        if (e instanceof z.ZodError) {
+          setError(e.issues[0]?.message ?? "Invalid input")
+        } else if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          setError("Failed to register user")
+        }
       }
     }
 
@@ -175,8 +186,16 @@ function Authorization() {
 
         setPassword("")
         setConfirmPassword("")
+        setSuccessMsg("Password reset successfully.")
+        setAuthMode("login")
       } catch (e) {
-        // set error state if you want
+        if (e instanceof z.ZodError) {
+          setError(e.issues[0]?.message ?? "Invalid input")
+        } else if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          setError("Failed to reset password")
+        }
       }
     }
 
@@ -256,6 +275,7 @@ function Authorization() {
           <br/>
 
           {
+            successMsg ? <SuccessBanner value={successMsg} /> :
             error ? <ErrorBanner value={error} /> : null
           } 
 
@@ -318,7 +338,7 @@ function Authorization() {
             </form>
 
             {
-              authMode === "register" ?
+              authMode === "register" || authMode === "reset" ?
               <div id="password-reqs" className="col-span-2 text-start text-xs">
                 <Criteria 
                     value="At least 6 characters long" 
