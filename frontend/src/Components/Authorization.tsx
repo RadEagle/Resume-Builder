@@ -196,6 +196,8 @@ function Authorization() {
         const response = await resetPassword(resetPasswordPayload)
         console.log(response)
 
+        window.history.replaceState({}, document.title, window.location.pathname)
+
         setPassword("")
         setConfirmPassword("")
         setSuccessMsg("Password reset successfully.")
@@ -392,9 +394,7 @@ function Authorization() {
               </div> : null
             }
 
-            <br/>
-
-            <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full">
+            <div id="authorization-buttons" className="col-span-2 flex justify-between gap-2 w-full my-6">
                 {
                   authMode === "login" ?
                   <>
