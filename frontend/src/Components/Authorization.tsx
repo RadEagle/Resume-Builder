@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Schemas, type ForgotPasswordRequest, type ResetPasswordRequest, type UserRegister } from '../types'
-import { useAuth } from '../auth/AuthContext'
+import { parseDetail, useAuth } from '../auth/AuthContext'
 import { buildUrl } from '../api'
 import { InputField, PasswordField } from '../Library/InputField'
 import { buttonControlClass } from '../Library/fieldStyles'
@@ -20,11 +20,12 @@ async function registerUser(payload: UserRegister) {
       body: JSON.stringify(payload)
     })
     if (!response.ok) {
-      throw new Error("Failed to register user - fetch error")
+      throw new Error(await parseDetail(response, "Failed to register user"))
     }
     
     return response.json()
   } catch (e) {
+    if (e instanceof Error) throw e
     throw new Error("Failed to register user - unknown error")
   }
 }
@@ -39,11 +40,12 @@ async function sendEmail(payload: ForgotPasswordRequest) {
       body: JSON.stringify(payload)
     })
     if (!response.ok) {
-      throw new Error("Failed to send email - fetch error")
+      throw new Error(await parseDetail(response, "Failed to send email"))
     }
     
     return response.json()
   } catch (e) {
+    if (e instanceof Error) throw e
     throw new Error("Failed to send email - unknown error")
   }
 }
@@ -58,11 +60,12 @@ async function resetPassword(payload: ResetPasswordRequest) {
       body: JSON.stringify(payload)
     })
     if (!response.ok) {
-      throw new Error("Failed to reset password - fetch error")
+      throw new Error(await parseDetail(response, "Failed to reset password"))
     }
     
     return response.json()
   } catch (e) {
+    if (e instanceof Error) throw e
     throw new Error("Failed to reset password - unknown error")
   }
 }
@@ -75,9 +78,11 @@ function Authorization() {
     const [confirmPassword, setConfirmPassword] = useState("")
     const [authMode, setAuthMode] = useState("login")
     const [successMsg, setSuccessMsg] = useState("")
-    const { error, login, setUser, setToken, setError } = useAuth()
+    const { user, error, login, setUser, setToken, setError } = useAuth()
   
     async function handleLogin() {
+      setSuccessMsg("")
+
       try {
         const userPayload = Schemas.UserLoginSchema.parse({
             identifier: identifier.trim(),
@@ -90,7 +95,13 @@ function Authorization() {
         setIdentifier("")
         setPassword("")
       } catch (e) {
-        // set error state if you want
+        if (e instanceof z.ZodError) {
+          setError(e.issues[0]?.message ?? "Invalid input")
+        } else if (e instanceof Error) {
+          setError(e.message)
+        } else {
+          setError("Failed to login user")
+        }
       }
     }
 
@@ -136,6 +147,7 @@ function Authorization() {
       setUsername("")
       setPassword("")
       setError(null)
+      setSuccessMsg("")
     }
 
     function handleBackToLogin() {
@@ -238,6 +250,7 @@ function Authorization() {
       setPassword("")
       setConfirmPassword("")
       setError(null)
+      setSuccessMsg("")
     }
 
     function handleSwitchToRegister() {
@@ -248,8 +261,17 @@ function Authorization() {
       setIdentifier("")
       setPassword("")
       setError(null)
+      setSuccessMsg("")
     }
-  
+
+    // if there is a reset token in the url, set the auth mode to reset
+    useEffect(() => {
+      const token = new URLSearchParams(window.location.search).get("reset_token")
+      if (token && !user) {
+        setAuthMode("reset")
+      }
+    }, [])
+    
     return (
       <>
         <section id="enter-credentials" className="m-4 flex flex-col min-w-lg min-h-64">
@@ -275,7 +297,10 @@ function Authorization() {
           <br/>
 
           {
-            successMsg ? <SuccessBanner value={successMsg} /> :
+            successMsg ? <SuccessBanner value={successMsg} /> : null
+          }
+
+          {
             error ? <ErrorBanner value={error} /> : null
           } 
 
@@ -325,7 +350,7 @@ function Authorization() {
               }
 
               {
-                authMode === "register" ?
+                authMode === "register" || authMode === "reset" ?
                 <PasswordField 
                   required={authMode === "register" || authMode === "reset"}
                   label="Confirm Password:"
@@ -358,7 +383,7 @@ function Authorization() {
                 />
                 <Criteria 
                     value="Contains at least one special character (e.g., !@#$%^&*)" 
-                    condition={!!password.match(/[!@#$%^&*]/)}
+                    condition={!!password.match(/[^a-zA-Z0-9\s]/)}
                 />
                 <Criteria 
                     value="Passwords must match" 
@@ -374,7 +399,6 @@ function Authorization() {
                   authMode === "login" ?
                   <>
                     <button onClick={() => void handleLogin()} className={buttonControlClass}>Login</button>
-                    <button onClick={() => void handleForgotPassword()} className={buttonControlClass}>Forgot Password?</button> 
                   </> : null
                 }
                 
@@ -396,6 +420,14 @@ function Authorization() {
                   <button onClick={() => void handleResetPassword()} className={buttonControlClass}>Reset Password</button> : null
                 }
             </div>
+
+            {/* forgot password */}
+            {
+              authMode === "login" ?
+              <div id="forgot-password-link" className="col-span-2 text-center text-sm underline hover:text-gray-500">
+                <a onClick={() => void handleForgotPassword()} className="hover:cursor-pointer">Forgot Password?</a>
+              </div> : null
+            }
           </div>
         </section>
       </>

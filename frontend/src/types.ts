@@ -149,7 +149,7 @@ export const Schemas = {
 
     // UserLogin
     UserLoginSchema: z.object({
-        identifier: z.string().trim().min(1),
+        identifier: z.string().trim().min(1, { error: "Please enter your email or username" }),
         password: z.string()
     }),
 

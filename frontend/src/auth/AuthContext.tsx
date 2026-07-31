@@ -4,6 +4,29 @@ import { buildUrl } from "../api"
 import { Schemas } from "../types"
 
 
+async function parseDetail(response: Response, fallback: string) {
+    let message = fallback
+    try {
+        const body = await response.json()
+        const detail = body.detail
+        if (typeof(detail) === "string") {
+            message = detail
+        }
+        else if (Array.isArray(detail)) {
+            message = ""
+            for (const item of detail) {
+                const line = item.msg ? item.msg : String(item)
+                message = message ? `${message}, ${line}` : line
+            }
+        }
+    } 
+    catch (e) {
+        message = e instanceof Error ? e.message : "Something went wrong"
+    }
+    return message
+}
+
+
 type AuthValue = {
     user: UserRead | null
     token: string | null
@@ -37,27 +60,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         })
 
         if (!response.ok) {
-            let message = "Login failed"
-            try {
-                const body = await response.json()
-                const detail = body.detail
-                if (typeof(detail) === "string") {
-                    message = detail
-                }
-                else if (Array.isArray(detail)) {
-                    message = ""
-                    for (const item of detail) {
-                        const line = item.msg ? item.msg : String(item)
-                        message = message ? `${message}, ${line}` : line
-                    }
-                }
-                setError(message)
-            }
-            catch (e) {
-                setError(e instanceof Error ? e.message : "Something went wrong")
-            }
-
-            console.error(message, response.statusText)
+            const message = await parseDetail(response, "Login failed")
+            setError(message)
             throw new Error(message)
         }
 
@@ -97,4 +101,4 @@ const useAuth = () => {
     return context
 }
 
-export { AuthProvider, useAuth }
+export { AuthProvider, useAuth, parseDetail }
