@@ -159,6 +159,9 @@ function Authorization() {
     }
 
     async function handleSendEmail() {
+      setSuccessMsg("")
+      setError(null)
+      
       try {
         const forgotPasswordPayload = Schemas.ForgotPasswordRequestSchema.parse({
             email: email.trim()

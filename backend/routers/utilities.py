@@ -107,6 +107,7 @@ def get_frontend_url() -> str:
 def send_password_reset_email(to_email, reset_link):
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
     SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL")
+    SES_DISPLAY_NAME = os.getenv("SES_DISPLAY_NAME")
     AWS_REGION = os.getenv("AWS_REGION")
     log = logging.getLogger(__name__)
 
@@ -124,14 +125,14 @@ def send_password_reset_email(to_email, reset_link):
     client = boto3.client("ses", region_name=AWS_REGION)
     try:
         client.send_email(
-            Source=SES_FROM_EMAIL,
+            Source=f'"{SES_DISPLAY_NAME}" <{SES_FROM_EMAIL}>',
             Destination={
                 'ToAddresses': [to_email]
             },
             Message={
                 'Subject': {
                     'Charset': 'UTF-8',
-                    'Data': "reset your password",
+                    'Data': "Reset Your Password",
                 },
                 'Body': {
                     'Html': {

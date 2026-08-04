@@ -25,6 +25,7 @@
 
 * AWS_REGION={your aws region}
 * SES_FROM_EMAIL={your email sender}
+* SES_DISPLAY_NAME={your email display name, unquoted}
 * FRONTEND_URL={your local or production domain address}
 
 ## Frontend
