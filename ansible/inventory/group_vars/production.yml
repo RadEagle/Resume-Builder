@@ -9,3 +9,5 @@ nginx_server_names: "{{ domain_name }} www.{{ domain_name }}"
 
 db_name: "resume_vault_prod"
 db_host: "terraform-f6b5e348461be113ad9247c9d5.cg3gmeu6i1g7.us-east-1.rds.amazonaws.com"
+
+frontend_url: "https://{{ domain_name }}"

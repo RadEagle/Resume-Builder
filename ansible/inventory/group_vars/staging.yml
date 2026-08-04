@@ -3,3 +3,5 @@
 cors_origins: "http://{{ ansible_host }},http://staging.{{ domain_name }}"
 nginx_server_names: "{{ ansible_host }} staging.{{ domain_name }}"
 db_host: "127.0.0.1"
+
+frontend_url: "http://staging.{{ domain_name }}"

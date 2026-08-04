@@ -11,7 +11,7 @@
 # Running the App
 1. In your backend terminal, ensure it is in venv
 2. If not, activate it with `source .venv/Scripts/activate`
-3. Run the backend with `uvicorn main:app --reload --port 8000`
+3. Run the backend with `python -m uvicorn main:app --reload --port 8000`
 4. Open your backend app and go to docs to test your backend. (e.g. `localhost:8000/docs`)
 5. In your frontend terminal, run the frontend with `npm run dev`
 
@@ -22,6 +22,10 @@
 * JWT_ALGORITHM=HS256
 * ACCESS_TOKEN_EXPIRE_MINUTES=60
 * REDIS_URL=redis//{address e.g. localhost}:{port e.g. 6379}/0
+
+* AWS_REGION={your aws region}
+* SES_FROM_EMAIL={your email sender}
+* FRONTEND_URL={your local or production domain address}
 
 ## Frontend
 * VITE_APP_URL=http://127.0.0.1:8000/api
