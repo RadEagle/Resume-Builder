@@ -1,4 +1,5 @@
 import os
+from botocore.discovery import BotoCoreError
 from dotenv import load_dotenv
 from pathlib import Path
 import logging
@@ -6,7 +7,7 @@ from fastapi import HTTPException
 from database import pool
 from psycopg.rows import dict_row
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import ClientError, NoCredentialsError
 
 
 async def ensure_profile_id_exists(profile_id: int, user_id):
@@ -148,5 +149,8 @@ def send_password_reset_email(to_email, reset_link):
         return True
 
     except ClientError:
-        log.exception("SES send failed")
+        log.exception("ClientError: SES send failed")
+        return False
+    except NoCredentialsError:
+        log.exception("NoCredentialsError: SES send failed")
         return False
