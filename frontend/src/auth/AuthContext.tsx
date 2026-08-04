@@ -4,11 +4,39 @@ import { buildUrl } from "../api"
 import { Schemas } from "../types"
 
 
+async function parseDetail(response: Response, fallback: string) {
+    let message = fallback
+    try {
+        const body = await response.json()
+        const detail = body.detail
+        if (typeof(detail) === "string") {
+            message = detail
+        }
+        else if (Array.isArray(detail)) {
+            message = ""
+            for (const item of detail) {
+                const line = item.msg ? item.msg : String(item)
+                message = message ? `${message}, ${line}` : line
+            }
+        }
+    } 
+    catch (e) {
+        message = e instanceof Error ? e.message : "Something went wrong"
+    }
+    return message
+}
+
+
 type AuthValue = {
     user: UserRead | null
     token: string | null
     login: (payload: UserLogin) => Promise<void>
     logout: () => void
+    error: string | null
+
+    setUser: (user: UserRead | null) => void
+    setToken: (token: string | null) => void
+    setError: (error: string | null) => void
 }
 
 
@@ -20,6 +48,7 @@ const AuthContext = createContext<AuthValue | undefined>(undefined)
 const AuthProvider = ({ children }: PropsWithChildren) => {
     const [user, setUser] = useState<UserRead | null>(null)
     const [token, setToken] = useState<string | null>(null)
+    const [error, setError] = useState<string | null>(null)
 
     const login = async (payload: UserLogin) => {
         const response = await fetch(buildUrl("auth/login"), {
@@ -31,28 +60,32 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         })
 
         if (!response.ok) {
-            console.error("Login failed", response.statusText)
-            throw new Error("Login failed")
+            const message = await parseDetail(response, "Login failed")
+            setError(message)
+            throw new Error(message)
         }
 
         const data = await response.json()
         const parsed = Schemas.TokenResponseSchema.safeParse(data)
         if (!parsed.success) {
+            // this shouldn't be a user-facing error
             console.error("Invalid response format", parsed.error)
             throw new Error("Invalid response format")
         }
 
         setUser(parsed.data.user)
         setToken(parsed.data.access_token)
+        setError(null)
     }
 
     const logout = () => {
         setUser(null)
         setToken(null)
+        setError(null)
     }
     
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout, error, setUser, setToken, setError }}>
             {children}
         </AuthContext.Provider>
     )
@@ -68,4 +101,4 @@ const useAuth = () => {
     return context
 }
 
-export { AuthProvider, useAuth }
+export { AuthProvider, useAuth, parseDetail }

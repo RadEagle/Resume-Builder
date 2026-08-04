@@ -1,5 +1,5 @@
 import './App.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ViteStarter, ViteNextSteps } from './Components/Vite.tsx'
 import { Profiles } from './Components/Profiles.tsx'
 import { Experiences } from './Components/Experiences.tsx'
@@ -24,6 +24,11 @@ function App() {
   const handleExperienceChange = () => {
     setExperienceVersion((prev) => prev + 1)
   }
+
+  // set the title of the page
+  useEffect(() => {
+    document.title = "StableTailor"
+  }, [])
 
   return (
     <>

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
 import { Schemas, type SkillRead } from '../types'
 import { useAuth } from '../auth/AuthContext'
+import { InputField } from '../Library/InputField'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface SkillsProps {
@@ -36,6 +38,7 @@ function Skills({ profileId, profileName }: SkillsProps) {
 
     const { token } = useAuth()
   
+    // Fetch skills when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)
@@ -120,17 +123,16 @@ function Skills({ profileId, profileName }: SkillsProps) {
         
               <div id="skill-creation" className="m-4 flex flex-col gap-2">
                 <h2>Create Skill</h2>
-                <input 
-                  type="text" 
+                <InputField 
+                  label=""
                   placeholder="Enter skill name..." 
                   value={newSkillName}
-                  onChange={e => setNewSkillName(e.target.value)}
-                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                  onChange={setNewSkillName}
                 />
                 <select
                   value={newSkillCategory}
                   onChange={e => setNewSkillCategory(e.target.value)}
-                  className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                  className={fieldControlClass}
                 >
                     <option value="technical">Technical</option>
                     <option value="soft">Soft</option>

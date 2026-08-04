@@ -1,12 +1,17 @@
-// Use Python: Select Interpreter -> local venv instead
-
-// {
-//   "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/Scripts/python.exe",
-//   "python-envs.pythonProjects": []
-// }
-
 {
-    "typescript.tsdk": "frontend/node_modules/typescript/lib",
-    "typescript.enablePromptUseWorkspaceTsdk": true,
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true
-  }
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/Scripts/python.exe",
+  "python.terminal.useEnvFile": true,
+  "python-envs.pythonProjects": [
+    { "path": "backend" }
+  ],
+  "python-envs.workspaceSearchPaths": [
+    "backend/.venv"
+  ],
+
+  "js/ts.tsdk.path": "frontend/node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+
+  "ansible.validation.enabled": false,
+  "ansible.validation.lint.enabled": false
+}

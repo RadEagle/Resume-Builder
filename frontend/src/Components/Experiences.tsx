@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
 import { Schemas, type ExperienceCreate, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
+import { DateField, InputField } from '../Library/InputField.tsx'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface ExperiencesProps {
@@ -56,6 +58,7 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
 
     const { token } = useAuth()
   
+    // Fetch experiences when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)
@@ -169,7 +172,7 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
                     id="experience-kind"
                     value={newExperienceKind}
                     onChange={e => setNewExperienceKind(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+                    className={fieldControlClass}
                   >
                     <option value="work">Work</option>
                     <option value="school">School</option>
@@ -177,88 +180,80 @@ function Experiences({ profileId, profileName, onExperienceChange }: Experiences
                   </select>
                   {
                     newExperienceKind === "work" || newExperienceKind === "side_project" ? 
-                    <input 
-                      type="text" 
+                    <InputField  
                       required
-                      placeholder="Enter experience title..." 
+                      label=""
+                      placeholder="Enter experience title..."
                       value={newExperienceTitle}
-                      onChange={e => setNewExperienceTitle(e.target.value)}
-                      className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                      onChange={setNewExperienceTitle}
                     />
                     : null
                   }
                   {
                     newExperienceKind === "work" || newExperienceKind === "school" ? 
-                    <input 
-                      type="text" 
+                    <InputField 
                       required
+                      label=""
                       placeholder="Enter experience organization..." 
                       value={newExperienceOrganization}
-                      onChange={e => setNewExperienceOrganization(e.target.value)}
-                      className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                      onChange={setNewExperienceOrganization}
                     />
                     : null
                   }
                   {
                     newExperienceKind === "work" || newExperienceKind === "school" ? 
-                    <input 
-                      type="text" 
+                    <InputField 
                       required
+                      label=""
                       placeholder="Enter experience location..." 
                       value={newExperienceLocation}
-                      onChange={e => setNewExperienceLocation(e.target.value)}
-                      className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                      onChange={setNewExperienceLocation}
                     />
                     : null
                   }
                   {
                     newExperienceKind === "school" ? 
-                    <input 
-                      type="text" 
+                    <InputField 
                       required
+                      label=""
                       placeholder="Enter degree..." 
                       value={newDegree}
-                      onChange={e => setNewDegree(e.target.value)}
-                      className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                      onChange={setNewDegree}
                     />
                     : null
                   }
                   {
                     newExperienceKind === "school" ? 
-                    <input 
-                      type="text" 
+                    <InputField 
+                      label=""
                       placeholder="Enter major..." 
                       value={newMajor}
-                      onChange={e => setNewMajor(e.target.value)}
-                      className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                      onChange={setNewMajor}
                     />
                     : null
                   }
                   {
                     newExperienceKind === "school" ? 
-                    <input 
-                      type="text" 
+                    <InputField 
+                      label=""
                       placeholder="Enter GPA..." 
                       value={newGPA}
-                      onChange={e => setNewGPA(e.target.value)}
-                      className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                      onChange={setNewGPA}
                     />
                     : null
                   }
-                  <input 
-                    type="date"
+                  <DateField 
                     required
+                    label=""
                     placeholder="Enter start date..." 
                     value={newStartDate}
-                    onChange={e => setNewStartDate(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    onChange={setNewStartDate}
                   />
-                  <input 
-                    type="date" 
+                  <DateField 
+                    label=""
                     placeholder="Enter end date..." 
                     value={newEndDate}
-                    onChange={e => setNewEndDate(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    onChange={setNewEndDate}
                   />
                   <button type="submit" className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
                 </form>

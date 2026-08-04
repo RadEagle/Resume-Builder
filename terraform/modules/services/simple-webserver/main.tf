@@ -19,6 +19,8 @@ resource "aws_instance" "resume_server" {
   key_name                    = var.key_name
   associate_public_ip_address = true
 
+  iam_instance_profile = aws_iam_instance_profile.webserver.name
+
   tags = {
     Name = var.instance_name
   }

@@ -1,10 +1,24 @@
 import { z } from "zod" // ensure the same version of Zod is used
 
 
+// Define Type Constants
+const UsernameSchema = z.string()
+    .min(3, { error: "Username must be at least 3 characters long" })
+    .max(15, { error: "Username must be at most 15 characters long" })
+    .regex(/^[a-zA-Z0-9]+$/, { error: "Username must contain only alphanumeric characters " })
+
+const StrongPasswordSchema = z.string()
+    .min(6, { error: "Password must be at least 6 characters long" })
+    .regex(/[a-z]/, { error: "Password must contain at least 1 lowercase letter" })
+    .regex(/[A-Z]/, { error: "Password must contain at least 1 uppercase letter" })
+    .regex(/[0-9]/, { error: "Password must contain at least 1 number" })
+    .regex(/[^a-zA-Z0-9\s]/, { error: "Password must contain at least 1 special character" })
+
 // Define Nested Schemas first
 // UserRead
 const UserReadSchema = z.object({
     id: z.int(),
+    username: z.string().trim(),
     email: z.email(),
     created_at: z.coerce.date()
 });
@@ -127,15 +141,37 @@ export const Schemas = {
 
     // UserRegister
     UserRegisterSchema: z.object({
+        username: UsernameSchema,
         email: z.email(),
-        password: z.string().trim().min(6)
+        password: StrongPasswordSchema
     }),
 
 
     // UserLogin
     UserLoginSchema: z.object({
-        email: z.email(),
-        password: z.string().trim().min(6)
+        identifier: z.string().trim().min(1, { error: "Please enter your email or username" }),
+        password: z.string()
+    }),
+
+    // ForgotPasswordRequestSchema
+    ForgotPasswordRequestSchema: z.object({
+        email: z.email()
+    }),
+
+    // ForgotPasswordResponseSchema
+    ForgotPasswordResponseSchema: z.object({
+        message: z.string()
+    }),
+
+    // ResetPasswordRequestSchema
+    ResetPasswordRequestSchema: z.object({
+        token: z.string(),
+        password: StrongPasswordSchema
+    }),
+
+    // ResetPasswordResponseSchema
+    ResetPasswordResponseSchema: z.object({
+        message: z.string()
     }),
 
     // Nested Schemas
@@ -165,3 +201,7 @@ export type UserRegister = SchemaTypes['UserRegisterSchema'];
 export type UserLogin = SchemaTypes['UserLoginSchema'];
 export type UserRead = SchemaTypes['UserReadSchema'];
 export type TokenResponse = SchemaTypes['TokenResponseSchema'];
+export type ForgotPasswordRequest = SchemaTypes['ForgotPasswordRequestSchema'];
+export type ForgotPasswordResponse = SchemaTypes['ForgotPasswordResponseSchema'];
+export type ResetPasswordRequest = SchemaTypes['ResetPasswordRequestSchema'];
+export type ResetPasswordResponse = SchemaTypes['ResetPasswordResponseSchema'];

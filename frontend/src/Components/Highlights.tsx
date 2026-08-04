@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { fetchApi } from '../api'
 import { Schemas, type BulletRead, type CourseRead, type ExperienceRead } from '../types.ts'
 import { useAuth } from '../auth/AuthContext.tsx'
+import { InputField } from '../Library/InputField.tsx'
+import { fieldControlClass } from '../Library/fieldStyles'
 
 
 interface HighlightsProps {
@@ -74,9 +76,11 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
 
     const { token } = useAuth()
   
+    // Fetch highlights when token or profileId changes
     useEffect(() => {
       setLoading(true)
       setError(null)
+
       if (!token || !profileId)
       {
         setLoading(false)
@@ -84,11 +88,21 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
       }
 
       if (experienceId === "") {
+        setHighlights([])
+        setExperienceKind("")
         setLoading(false)
         return
       }
 
-      const selectedExperienceKind = experiences.find(experience => experience.id === Number(experienceId))?.kind
+      const selected = experiences.find((e) => e.id === Number(experienceId))
+      if (!selected) {
+        setHighlights([])
+        setExperienceKind("")
+        setLoading(false)
+        return
+      }
+
+      const selectedExperienceKind = selected.kind
 
       let highlightsPath = null
       if (selectedExperienceKind === "work" || selectedExperienceKind === "side_project") {
@@ -99,6 +113,8 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
 
       setExperienceKind(selectedExperienceKind)
       if (highlightsPath === null) {
+        setHighlights([])
+        setExperienceKind("")
         setLoading(false)
         return
       }
@@ -122,71 +138,85 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
         })
         .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch highlights"))
         .finally(() => setLoading(false))
-    }, [experienceId, token, profileId]);
+    }, [experienceId, token, profileId, experiences]);
 
+    // Fetch experiences when token or profileId changes
     useEffect(() => {
-        setLoading(true)
-        setError(null)
-        if (!token || !profileId)
-        {
-          setLoading(false)
-          return
-        }
+      setLoading(true)
+      setError(null)
+      if (!token || !profileId)
+      {
+        setLoading(false)
+        return
+      }
 
-        const experiencesPath = `profiles/${profileId}/experiences`
-    
-        fetchApi(experiencesPath, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          token: token
+      const experiencesPath = `profiles/${profileId}/experiences`
+  
+      fetchApi(experiencesPath, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        token: token
+      })
+        .then(data => {
+          const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
+          setExperiences(parsed.success ? parsed.data : [])
         })
-          .then(data => {
-            const parsed = Schemas.ExperienceReadSchema.array().safeParse(data)
-            setExperiences(parsed.success ? parsed.data : [])
-          })
-          .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
-          .finally(() => setLoading(false))
+        .catch(err => setError(err instanceof Error ? err.message : "Failed to fetch experiences"))
+        .finally(() => setLoading(false))
     }, [token, profileId, experienceVersion]);
 
+    // Fetch school degree by id when token or profileId changes
     useEffect(() => {
-        if (!token || !profileId)
-        {
-          setLoading(false)
-          return
-        }
+      if (!token || !profileId)
+      {
+        setLoading(false)
+        return
+      }
 
-        if (!experiences.length) {
-          setSchoolDegreeById({})
-          return
-        }
+      if (!experiences.length) {
+        setSchoolDegreeById({})
+        return
+      }
 
-        let cancelled = false
-        const schools = experiences.filter((e) => e.kind === 'school')
-        void Promise.all(
-          schools.map(async (e) => {
-            const data = await fetchApi(
-              `profiles/${profileId}/experiences/${e.id}/edu-details`,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                token: token
-              }
-            )
+      let cancelled = false
+      const schools = experiences.filter((e) => e.kind === 'school')
+      void Promise.all(
+        schools.map(async (e) => {
+          const data = await fetchApi(
+            `profiles/${profileId}/experiences/${e.id}/edu-details`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+              token: token
+            }
+          )
 
-            const parsed = Schemas.EduDetailReadSchema.array().safeParse(data)
-            const deg =
-              parsed.success && parsed.data[0] ? parsed.data[0].degree : ''
-            return [e.id, deg] as const
-          }),
-        ).then((pairs) => {
-          if (!cancelled) setSchoolDegreeById(Object.fromEntries(pairs))
-        })
-        return () => {
-          cancelled = true
-        }
-      }, [experiences, token, profileId]);
+          const parsed = Schemas.EduDetailReadSchema.array().safeParse(data)
+          const deg =
+            parsed.success && parsed.data[0] ? parsed.data[0].degree : ''
+          return [e.id, deg] as const
+        }),
+      ).then((pairs) => {
+        if (!cancelled) setSchoolDegreeById(Object.fromEntries(pairs))
+      })
+      return () => {
+        cancelled = true
+      }
+    }, [experiences, token, profileId]);
+
+    // Reset state when profileId changes
+    useEffect(() => {
+      setExperienceId("")
+      setHighlights([])
+      setExperienceKind("")
+      setNewExperienceBody("")
+      setNewCourseName("")
+      setNewCourseCode("")
+      setNewSortOrder("")
+      setError(null)
+    }, [profileId])
   
     async function handleCreateHighlight() {
       if (!token || !profileId)
@@ -245,7 +275,7 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
                 name="experience-specific" 
                 value={experienceId}
                 onChange={e => setExperienceId(e.target.value)}
-                className="text-slate-800 dark:bg-gray-50 rounded-2xl pl-4 pr-12 py-0.5"
+                className={fieldControlClass}
               >
                 <option value="">Select an experience</option>
                 {experiences.map(e => (
@@ -260,39 +290,36 @@ function Highlights({ profileId, profileName, experienceVersion }: HighlightsPro
                     placeholder="Enter experience body..." 
                     value={newExperienceBody}
                     onChange={e => setNewExperienceBody(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    className={fieldControlClass}
                   />
                   : null
               }
               {
                   experienceKind === "school" ? 
-                  <input 
-                    type="text" 
+                  <InputField 
                     required
+                    label=""
                     placeholder="Enter course name..." 
                     value={newCourseName}
-                    onChange={e => setNewCourseName(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    onChange={setNewCourseName}
                   />
                   : null
               }
               {
                   experienceKind === "school" ? 
-                  <input 
-                    type="text" 
+                  <InputField 
+                    label=""
                     placeholder="Enter course code..." 
                     value={newCourseCode}
-                    onChange={e => setNewCourseCode(e.target.value)}
-                    className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                    onChange={setNewCourseCode}
                   />
                   : null
               }
-              <input 
-                type="text" 
+              <InputField 
+                label=""
                 placeholder="Enter sort order..." 
                 value={newSortOrder}
-                onChange={e => setNewSortOrder(e.target.value)}
-                className="text-slate-800 dark:bg-gray-50 rounded-2xl px-4 py-0.5"
+                onChange={setNewSortOrder}
               />
               <button onClick={() => void handleCreateHighlight()} className="cursor-pointer text-white bg-blue-300 rounded-2xl px-4 py-0.5 hover:bg-blue-400 hover:opacity-80 active:scale-95 active:bg-blue-500">Create</button>
             </div>

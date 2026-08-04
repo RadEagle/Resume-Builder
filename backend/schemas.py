@@ -1,8 +1,30 @@
 from datetime import datetime, date
-from pydantic import BaseModel, EmailStr, Field
-from typing import Literal, Optional
+from pydantic import BaseModel, EmailStr, Field, AfterValidator
+from typing import Literal, Optional, Annotated
 
 
+# region Validators
+def validate_strong_password(v: str) -> str:
+    if not (
+        any(c.islower() for c in v)
+        and any(c.isupper() for c in v)
+        and any(c.isdigit() for c in v)
+        and any(not c.isalnum() and not c.isspace() for c in v)
+    ):
+        raise ValueError(
+            "Password must include lowercase, uppercase, a digit, and a special character"
+        )
+    return v
+
+# endregion
+
+# region Constants
+Username = Annotated[str, Field(min_length=3, max_length=15, pattern=r'^[a-zA-Z0-9]+$')]
+StrongPassword = Annotated[str, Field(min_length=6), AfterValidator(validate_strong_password)]
+
+# endregion
+
+# region Database Types
 # ProfileCreate
 class ProfileCreate(BaseModel):
     name: str = Field(..., min_length=3, max_length=20)
@@ -96,22 +118,26 @@ class SkillRead(BaseModel):
     name: str
     category: Literal["technical", "soft", "interest"]
 
+# endregion
 
+# region Authorization
 # UserRegister
 class UserRegister(BaseModel):
+    username: Username
     email: EmailStr
-    password: str = Field(..., min_length=6)
+    password: StrongPassword
 
 
 # UserLogin
 class UserLogin(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)
+    identifier: str = Field(..., min_length=1)
+    password: str
 
 
 # UserRead
 class UserRead(BaseModel):
     id: int
+    username: str
     email: EmailStr
     created_at: datetime
 
@@ -121,3 +147,26 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"]
     user: UserRead
+
+
+# ForgotPasswordRequest
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+# ForgotPasswordResponse
+class ForgotPasswordResponse(BaseModel):
+    message: str
+
+
+# ResetPasswordRequest
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: StrongPassword
+
+
+# ResetPasswordResponse
+class ResetPasswordResponse(BaseModel):
+    message: str
+
+# endregion
