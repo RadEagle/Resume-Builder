@@ -4,6 +4,12 @@
     name: "{{ certbot_packages }}"
     state: present
 
+- name: Ensure Certbot deploy hooks directory exists
+  ansible.builtin.file:
+    path: /etc/letsencrypt/renewal-hooks/deploy
+    state: directory
+    mode: "0755"
+
 - name: Install Certbot deploy hook to reload nginx
   ansible.builtin.copy:
     dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
