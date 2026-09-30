@@ -10,6 +10,7 @@ ansible/collections/
 terraform/**/.terraform
 terraform/**/*.tfstate*
 terraform/**/aws*
+terraform/**/rds
 .cursor
 .neon
 .env.local
