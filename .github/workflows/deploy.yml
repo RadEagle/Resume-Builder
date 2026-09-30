@@ -161,6 +161,7 @@ jobs:
           export ANSIBLE_HOST_KEY_CHECKING=False
           export STAGING_EC2_HOST="${{ env.STAGING_EC2_HOST }}"
 
+          : # mask password so sensitive logs don't print it
           DB_PASSWORD="$(ansible-vault view inventory/group_vars/all/vault.yml \
             --vault-password-file "$GITHUB_WORKSPACE/temp_ansible_pass.txt" \
             | awk '/^db_admin_password:/ { print $2 }' | tr -d "\"'")"
@@ -174,7 +175,6 @@ jobs:
           -i inventory/hosts.yml   \
           --limit 'amazon_linux:&${{ env.ANSIBLE_GROUP }}'   \
           -e "target_group=${{ env.ANSIBLE_GROUP }}"   \
-          -e postgres_users_no_log=false \
           -c local \
           --vault-password-file $GITHUB_WORKSPACE/temp_ansible_pass.txt
 
