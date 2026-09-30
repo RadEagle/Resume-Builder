@@ -161,10 +161,20 @@ jobs:
           export ANSIBLE_HOST_KEY_CHECKING=False
           export STAGING_EC2_HOST="${{ env.STAGING_EC2_HOST }}"
 
+          DB_PASSWORD="$(ansible-vault view inventory/group_vars/all/vault.yml \
+            --vault-password-file "$GITHUB_WORKSPACE/temp_ansible_pass.txt" \
+            | awk '/^db_admin_password:/ { print $2 }' | tr -d "\"'")"
+          if [ -z "$DB_PASSWORD" ]; then
+            echo "Could not read db_admin_password from the vault; not running with no_log off."
+            exit 1
+          fi
+          echo "::add-mask::${DB_PASSWORD}"
+
           ansible-playbook playbooks/site.yml   \
           -i inventory/hosts.yml   \
           --limit 'amazon_linux:&${{ env.ANSIBLE_GROUP }}'   \
           -e "target_group=${{ env.ANSIBLE_GROUP }}"   \
+          -e postgres_users_no_log=false \
           -c local \
           --vault-password-file $GITHUB_WORKSPACE/temp_ansible_pass.txt
 
