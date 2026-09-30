@@ -1,5 +1,6 @@
 .env
 **/.env
+**/.env.local
 **/node_modules
 **/__pycache__
 **/.vite
@@ -10,3 +11,7 @@ terraform/**/.terraform
 terraform/**/*.tfstate*
 terraform/**/aws*
 .cursor
+.neon
+.env.local
+node_modules/
+.agents

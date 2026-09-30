@@ -23,7 +23,6 @@ postgresql_users:
   - name: "{{ db_admin_user }}"
     password: "{{ db_admin_password }}"
     encrypted: true
-    db: "{{ db_name }}"
 
 postgresql_app_privs:
   - { type: database, privs: ALL }

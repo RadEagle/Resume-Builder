@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Node.js & Build Frontend
         uses: actions/setup-node@v6
@@ -26,7 +26,7 @@ jobs:
           npm install
           npm run build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: frontend-dist
           path: frontend/dist
@@ -35,12 +35,13 @@ jobs:
   deploy-production:
     if: github.ref_name == 'main'
     runs-on: [self-hosted, production]
+    needs: prepare-artifacts
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: frontend-dist
           path: frontend/dist 
@@ -105,12 +106,13 @@ jobs:
   deploy-staging:
     if: github.ref_name == 'staging'
     runs-on: [self-hosted, staging]
+    needs: prepare-artifacts
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: frontend-dist
           path: frontend/dist 
@@ -158,6 +160,16 @@ jobs:
           export ANSIBLE_ROLES_PATH=$(pwd)/roles
           export ANSIBLE_HOST_KEY_CHECKING=False
           export STAGING_EC2_HOST="${{ env.STAGING_EC2_HOST }}"
+
+          : # mask password so sensitive logs don't print it
+          DB_PASSWORD="$(ansible-vault view inventory/group_vars/all/vault.yml \
+            --vault-password-file "$GITHUB_WORKSPACE/temp_ansible_pass.txt" \
+            | awk '/^db_admin_password:/ { print $2 }' | tr -d "\"'")"
+          if [ -z "$DB_PASSWORD" ]; then
+            echo "Could not read db_admin_password from the vault; not running with no_log off."
+            exit 1
+          fi
+          echo "::add-mask::${DB_PASSWORD}"
 
           ansible-playbook playbooks/site.yml   \
           -i inventory/hosts.yml   \
