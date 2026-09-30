@@ -6,4 +6,4 @@ from psycopg_pool import AsyncConnectionPool
 
 load_dotenv(Path(__file__).resolve().parent / ".env")
 DATABASE_URL = os.getenv("DATABASE_URL")
-pool = AsyncConnectionPool(conninfo=DATABASE_URL, open=False)
+pool = AsyncConnectionPool(conninfo=DATABASE_URL, open=False, min_size=0, max_size=5, max_idle=300)

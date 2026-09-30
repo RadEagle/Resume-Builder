@@ -8,8 +8,9 @@ certbot_cert_name: "{{ domain_name }}"
 nginx_server_names: "{{ domain_name }} www.{{ domain_name }}"
 
 db_name: "neondb"
-db_admin_password: "{{ db_admin_password_prod }}"
 db_admin_user: "neondb_owner"
+db_admin_password: "{{ db_admin_password_prod }}"
 db_host: ep-square-art-b77xhm9q.c-13.us-east-1.aws.neon.tech
+db_conn_params: "sslmode=require&channel_binding=require"
 
 frontend_url: "https://{{ domain_name }}"
